@@ -295,13 +295,30 @@ func (s *Scheduler) executeScheduleOnce(schedule *model.Schedule, run *model.Run
 	}
 
 	run.ArtifactPath = artifactPath
+	log.Printf("Report saved to %s (%d bytes)", artifactPath, len(reportData))
 
-	// Send email
-	if settings.SMTPConfig == nil {
-		return fmt.Errorf("SMTP configuration not set in plugin settings")
+	// Update run record with artifact info BEFORE sending email
+	// This makes the download button available immediately in the UI
+	if err := s.store.UpdateRun(run); err != nil {
+		log.Printf("WARNING: Failed to update run record with artifact path: %v", err)
+		// Continue anyway - we'll try to update again after email attempt
+	} else {
+		log.Printf("Run record updated with artifact path (download now available in UI)")
 	}
-	smtpConfig := *settings.SMTPConfig
 
+	// Send email (optional - report is already saved to disk)
+	if settings.SMTPConfig == nil {
+		log.Printf("SMTP not configured for org %d - report saved to %s (available for download)", schedule.OrgID, artifactPath)
+		run.EmailSent = false
+		run.EmailError = "SMTP not configured"
+		// Update run with email status
+		if err := s.store.UpdateRun(run); err != nil {
+			log.Printf("WARNING: Failed to update run record with email status: %v", err)
+		}
+		return nil // Report generation succeeded, email delivery is optional
+	}
+
+	smtpConfig := *settings.SMTPConfig
 	mailer := mail.NewMailer(smtpConfig)
 
 	// Interpolate template variables
@@ -315,10 +332,26 @@ func (s *Scheduler) executeScheduleOnce(schedule *model.Schedule, run *model.Run
 	subject := mail.InterpolateTemplate(schedule.EmailSubject, vars)
 	body := mail.InterpolateTemplate(schedule.EmailBody, vars)
 
+	// Try to send email, but don't fail the entire run if it fails
+	log.Printf("Attempting to send email for schedule %d to %d recipient(s)...", schedule.ID, len(schedule.Recipients.To))
 	if err := mailer.SendReport(schedule.Recipients, subject, body, reportData, filename); err != nil {
-		return fmt.Errorf("failed to send email: %w", err)
+		log.Printf("Failed to send email for schedule %d: %v - report saved to %s (available for download)", schedule.ID, err, artifactPath)
+		run.EmailSent = false
+		run.EmailError = err.Error()
+		// Update run with email failure status
+		if err := s.store.UpdateRun(run); err != nil {
+			log.Printf("WARNING: Failed to update run record with email error: %v", err)
+		}
+		return nil // Report generation succeeded, email delivery failed but report is available
 	}
 
+	log.Printf("Email sent successfully for schedule %d to %d recipient(s)", schedule.ID, len(schedule.Recipients.To))
+	run.EmailSent = true
+	run.EmailError = "" // Clear any previous error
+	// Update run with email success status
+	if err := s.store.UpdateRun(run); err != nil {
+		log.Printf("WARNING: Failed to update run record with email success: %v", err)
+	}
 	return nil
 }
 
