@@ -11,9 +11,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/sheduled-reports-app"
+    "url": "https://github.com/FulgerX2007/grafana-scheduled-reports-app"
   },
-  "author": "Your Organization",
+  "author": "Andrian Iliev",
   "license": "Apache-2.0",
   "devDependencies": {
     "@grafana/data": "^12.2.0",
