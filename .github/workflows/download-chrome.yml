@@ -1,0 +1,69 @@
+name: Download Chrome for Testing
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/download-chrome.yml'
+      - 'build.sh'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  download-chrome:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check if Chrome already exists
+      id: check-chrome
+      run: |
+        if [ -d "chrome-linux64" ] && [ -f "chrome-linux64/chrome" ]; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Download Chrome for Testing
+      if: steps.check-chrome.outputs.exists == 'false'
+      run: |
+        echo "Downloading Chrome for Testing (stable)..."
+        CHROME_URL="https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chrome-linux64.zip"
+        wget -O chrome-linux64.zip "$CHROME_URL"
+
+        echo "Extracting Chrome..."
+        unzip -q chrome-linux64.zip
+
+        echo "Making Chrome executable..."
+        chmod +x chrome-linux64/chrome
+        chmod +x chrome-linux64/chrome_crashpad_handler
+        chmod +x chrome-linux64/chrome_sandbox
+
+        echo "Verifying Chrome binary..."
+        ls -lh chrome-linux64/chrome
+
+        echo "Cleaning up zip file..."
+        rm chrome-linux64.zip
+
+        echo "✓ Chrome downloaded successfully!"
+
+    - name: Verify Chrome
+      run: |
+        if [ -f "chrome-linux64/chrome" ]; then
+          echo "✓ Chrome binary exists"
+          ls -lh chrome-linux64/chrome
+        else
+          echo "✗ Chrome binary not found!"
+          exit 1
+        fi
+
+    - name: Cache Chrome
+      uses: actions/cache@v4
+      with:
+        path: chrome-linux64
+        key: chrome-linux64-131.0.6778.204
+        restore-keys: |
+          chrome-linux64-

@@ -1,0 +1,10 @@
+# Plugin Provisioning
+# This file enables the reporting plugin automatically
+
+apiVersion: 1
+
+apps:
+  - type: sheduled-reports-app
+    disabled: false
+    jsonData:
+      # Add any default configuration here

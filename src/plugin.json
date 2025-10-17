@@ -1,0 +1,104 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "app",
+  "name": "Scheduled Reports",
+  "id": "sheduled-reports-app",
+  "info": {
+    "description": "Automated dashboard reporting with Chromium-based PDF generation, email delivery, and flexible scheduling (daily, weekly, monthly, or custom cron expressions)",
+    "author": {
+      "name": "Andrian Iliev",
+      "url": "https://github.com/FulgerX2007/"
+    },
+    "keywords": ["reporting", "pdf", "email", "scheduler", "chromium", "automation", "dashboard", "export"],
+    "version": "0.0.1",
+    "updated": "%TODAY%",
+    "logos": {
+      "small": "img/logo.png",
+      "large": "img/logo.png"
+    },
+    "screenshots": [],
+    "links": [
+      {
+        "name": "Documentation",
+        "url": "https://github.com/FulgerX2007/grafana-scheduled-reports-app"
+      }
+    ]
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "Scheduled Reports",
+      "path": "/a/sheduled-reports-app",
+      "role": "Editor",
+      "addToNav": true,
+      "defaultNav": true
+    },
+    {
+      "type": "page",
+      "name": "Create Schedule",
+      "path": "/a/sheduled-reports-app/schedule/new",
+      "role": "Editor",
+      "addToNav": false
+    },
+    {
+      "type": "page",
+      "name": "Edit Schedule",
+      "path": "/a/sheduled-reports-app/schedule/edit",
+      "role": "Editor",
+      "addToNav": false
+    },
+    {
+      "type": "page",
+      "name": "Run History",
+      "path": "/a/sheduled-reports-app/history",
+      "role": "Editor",
+      "addToNav": false
+    },
+    {
+      "type": "page",
+      "name": "Documentation",
+      "path": "/a/sheduled-reports-app/documentation",
+      "role": "Viewer",
+      "addToNav": false
+    },
+    {
+      "type": "page",
+      "name": "Settings",
+      "path": "/a/sheduled-reports-app/settings",
+      "role": "Admin",
+      "addToNav": false
+    }
+  ],
+  "dependencies": {
+    "grafanaDependency": ">=11.6.0"
+  },
+  "backend": true,
+  "executable": "gpx_reporting",
+  "routes": [
+    {
+      "path": "api/*",
+      "method": "*",
+      "reqRole": "Editor"
+    }
+  ],
+  "iam": {
+    "permissions": [
+      {
+        "action": "datasources:query",
+        "scope": "datasources:*"
+      },
+      {
+        "action": "dashboards:read",
+        "scope": "dashboards:*"
+      },
+      {
+        "action": "folders:read",
+        "scope": "folders:*"
+      },
+      {
+        "action": "annotations:read",
+        "scope": "annotations:*"
+      }
+    ]
+  }
+}

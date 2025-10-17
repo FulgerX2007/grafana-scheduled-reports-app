@@ -1,0 +1,35 @@
+node_modules
+dist
+coverage
+.DS_Store
+*.log
+.env
+.env.local
+*.db
+*.sqlite
+*.sqlite3
+artifacts/
+vendor/
+
+# E2E Testing
+test-results/
+playwright-report/
+playwright/.cache/
+docker-logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary
+tmp/
+temp/
+*.zip
+
+# Chrome binary (too large for GitHub - downloaded by workflow/build script)
+chrome-linux64/
+scheduled-reports-app-*/chrome-linux64/
+.gitlab-ci-local
+CLAUDE.md

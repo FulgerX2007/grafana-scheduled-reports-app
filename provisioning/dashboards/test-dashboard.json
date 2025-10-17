@@ -1,0 +1,83 @@
+{
+  "id": null,
+  "uid": "test-dashboard-001",
+  "title": "Test Dashboard for Reporting",
+  "tags": ["test", "e2e"],
+  "timezone": "browser",
+  "schemaVersion": 16,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "id": 1,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "type": "timeseries",
+      "title": "Random Walk",
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "PD8C576611E62080A"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "scenarioId": "random_walk",
+          "seriesCount": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "type": "stat",
+      "title": "Current Value",
+      "datasource": {
+        "type": "grafana-testdata-datasource",
+        "uid": "PD8C576611E62080A"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "scenarioId": "random_walk",
+          "seriesCount": 1
+        }
+      ]
+    }
+  ],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {
+    "list": [
+      {
+        "name": "test_var",
+        "type": "custom",
+        "current": {
+          "value": "value1",
+          "text": "Value 1"
+        },
+        "options": [
+          {
+            "value": "value1",
+            "text": "Value 1"
+          },
+          {
+            "value": "value2",
+            "text": "Value 2"
+          }
+        ]
+      }
+    ]
+  }
+}
