@@ -16,44 +16,20 @@ export const DocumentationPage: React.FC = () => {
       <section className={styles.section}>
         <h2>Overview</h2>
         <p>
-          The Scheduled Reports plugin allows you to schedule automatic generation and delivery of dashboard
-          reports via email. Reports can be generated as PDF or HTML and sent on a daily, weekly, monthly,
-          or custom cron schedule.
+          Scheduled Reports is a comprehensive Grafana app plugin that brings enterprise-grade automated dashboard
+          reporting to Grafana OSS. Schedule recurring reports, render dashboards to PDF using Chromium, and deliver
+          them via email - all managed through an intuitive UI.
         </p>
-      </section>
 
-      <section className={styles.section}>
-        <h2>Recent Updates</h2>
-
-        <h3>October 2025 - Timezone and Validation Improvements</h3>
+        <h3>Key Features</h3>
         <ul>
-          <li>
-            <strong>Timezone-Aware Scheduling:</strong> Schedules now run at the correct time in their configured
-            timezone. Daily schedules run at midnight (00:00), weekly on Monday at midnight, and monthly on the
-            1st at midnight in the schedule's timezone.
-          </li>
-          <li>
-            <strong>Automatic CRON Expression Generation:</strong> Existing schedules without CRON expressions
-            are automatically updated with the correct CRON format based on their interval type (daily/weekly/monthly).
-          </li>
-          <li>
-            <strong>CRON Expression Validation:</strong> Invalid CRON expressions are now validated when creating
-            or updating schedules, preventing configuration errors.
-          </li>
-          <li>
-            <strong>SMTP Configuration Fix:</strong> Resolved port validation errors when configuring SMTP with
-            common ports like 587. Settings now properly initialize with default values.
-          </li>
-          <li>
-            <strong>Variable Editor Enhancement:</strong> Duplicate button is now hidden for select-type dashboard
-            variables (those with predefined options), improving UI clarity.
-          </li>
+          <li><strong>Flexible Scheduling:</strong> Daily, weekly, monthly, or custom cron expressions with timezone support</li>
+          <li><strong>High-Fidelity Rendering:</strong> Chromium-based PDF generation with full JavaScript support</li>
+          <li><strong>Email Delivery:</strong> SMTP support with template variables and attachment management</li>
+          <li><strong>Complete Audit Trail:</strong> Run history with downloadable artifacts and error details</li>
+          <li><strong>Multi-Tenancy:</strong> Complete organization isolation for all data and settings</li>
+          <li><strong>Enterprise Configuration:</strong> Per-org SMTP, renderer settings, and usage limits</li>
         </ul>
-        <p>
-          <em>Note:</em> If you created schedules before this update, they have been automatically migrated to use
-          proper CRON expressions. Your next run times will now execute at the exact scheduled time in your timezone,
-          not at the time the schedule was last triggered.
-        </p>
       </section>
 
       <section className={styles.section}>
@@ -62,10 +38,10 @@ export const DocumentationPage: React.FC = () => {
         <h3>1. Configure Plugin Settings</h3>
         <p>Before creating schedules, configure the plugin in the Settings page:</p>
         <ul>
-          <li><strong>Service Account Authentication:</strong> Automatic for Grafana 10.3+ (uses managed service accounts via IAM permissions)</li>
+          <li><strong>Service Account Authentication:</strong> Automatic for Grafana 11.6+ (uses managed service accounts via IAM permissions)</li>
           <li><strong>SMTP Settings:</strong> Configure email delivery with Grafana's SMTP or custom SMTP server</li>
-          <li><strong>Chromium Renderer:</strong> Configure Chrome/Chromium browser for PDF generation</li>
-          <li><strong>Usage Limits:</strong> Set quotas for recipients, file sizes, concurrent renders, and retention</li>
+          <li><strong>Chromium Renderer:</strong> Configure Chrome/Chromium browser path and rendering options for PDF generation</li>
+          <li><strong>Usage Limits:</strong> Set quotas for recipients, file sizes, concurrent renders, retention days, and domain whitelisting</li>
         </ul>
 
         <h3>2. Create a Schedule</h3>
@@ -82,8 +58,8 @@ export const DocumentationPage: React.FC = () => {
         <h3>Basic Information</h3>
         <ul>
           <li><strong>Name:</strong> A descriptive name for your schedule (e.g., "Daily Sales Report")</li>
-          <li><strong>Dashboard:</strong> Select the dashboard to report</li>
-          <li><strong>Format:</strong> Choose PDF or HTML output</li>
+          <li><strong>Dashboard:</strong> Select the dashboard to report (auto-loads template variables)</li>
+          <li><strong>Format:</strong> PDF output (high-quality rendering via Chromium)</li>
           <li><strong>Enabled:</strong> Enable or disable the schedule</li>
         </ul>
 
@@ -328,8 +304,8 @@ export const DocumentationPage: React.FC = () => {
           <li><strong>Frontend:</strong> React/TypeScript UI for managing schedules and settings</li>
           <li><strong>Backend:</strong> Go service with cron scheduler and background workers</li>
           <li><strong>Database:</strong> SQLite for storing schedules, run history, and settings</li>
-          <li><strong>Renderer:</strong> Chromium/Chrome browser (via go-rod) for direct PDF generation</li>
-          <li><strong>Email:</strong> SMTP client for report delivery</li>
+          <li><strong>Renderer:</strong> Chromium/Chrome browser (via go-rod) for direct PDF generation using Chrome DevTools Protocol</li>
+          <li><strong>Email:</strong> SMTP client (gomail) for report delivery with template variable support</li>
           <li><strong>Authentication:</strong> Grafana managed service accounts (IAM permissions)</li>
         </ul>
 
@@ -337,7 +313,86 @@ export const DocumentationPage: React.FC = () => {
         <ul>
           <li><strong>Database:</strong> /var/lib/grafana/plugin-data/reporting.db</li>
           <li><strong>Artifacts:</strong> /var/lib/grafana/plugin-data/artifacts/org_[id]/</li>
+          <li><strong>Multi-tenancy:</strong> All data scoped by organization ID</li>
+          <li><strong>Retention:</strong> Artifacts auto-deleted based on configured retention days</li>
         </ul>
+
+        <h3>API Endpoints</h3>
+        <p>For programmatic access, the following REST API endpoints are available:</p>
+        <div className={styles.codeBlock}>
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/schedules</code></td>
+                <td>List all schedules</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/schedules</code></td>
+                <td>Create schedule</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/schedules/:id</code></td>
+                <td>Get schedule details</td>
+              </tr>
+              <tr>
+                <td>PUT</td>
+                <td><code>/api/schedules/:id</code></td>
+                <td>Update schedule</td>
+              </tr>
+              <tr>
+                <td>DELETE</td>
+                <td><code>/api/schedules/:id</code></td>
+                <td>Delete schedule</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/schedules/:id/run</code></td>
+                <td>Trigger immediate run</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/schedules/:id/runs</code></td>
+                <td>Get run history</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/runs/:id/artifact</code></td>
+                <td>Download PDF artifact</td>
+              </tr>
+              <tr>
+                <td>GET/POST</td>
+                <td><code>/api/settings</code></td>
+                <td>Get/update settings</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td><code>/api/smtp/test</code></td>
+                <td>Test SMTP configuration</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/chromium/check-version</code></td>
+                <td>Verify Chromium installation</td>
+              </tr>
+              <tr>
+                <td>GET</td>
+                <td><code>/api/service-account/status</code></td>
+                <td>Check service account status</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Base path: <code>/api/plugins/sheduled-reports-app/resources/api</code></p>
 
         <h3>Security</h3>
         <ul>
@@ -345,14 +400,30 @@ export const DocumentationPage: React.FC = () => {
           <li>All schedules are scoped by organization ID</li>
           <li>Users must have Editor role to create schedules</li>
           <li>Admin role required to modify plugin settings</li>
+          <li>Email domain whitelisting available for recipient restrictions</li>
         </ul>
       </section>
 
       <section className={styles.section}>
-        <h2>Support</h2>
+        <h2>Support & Resources</h2>
+
+        <h3>Documentation</h3>
+        <ul>
+          <li><strong>GitHub Repository:</strong> <a href="https://github.com/FulgerX2007/grafana-scheduled-reports-app" target="_blank" rel="noopener noreferrer">github.com/FulgerX2007/grafana-scheduled-reports-app</a></li>
+          <li><strong>Issues & Bug Reports:</strong> <a href="https://github.com/FulgerX2007/grafana-scheduled-reports-app/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a></li>
+          <li><strong>Discussions:</strong> <a href="https://github.com/FulgerX2007/grafana-scheduled-reports-app/discussions" target="_blank" rel="noopener noreferrer">GitHub Discussions</a></li>
+        </ul>
+
+        <h3>Additional Guides</h3>
+        <ul>
+          <li><strong>Quick Start:</strong> See QUICKSTART.md for 5-minute setup</li>
+          <li><strong>Setup Guide:</strong> See SETUP_GUIDE.md for detailed installation</li>
+          <li><strong>Authentication:</strong> See AUTHENTICATION.md for service account setup</li>
+          <li><strong>E2E Testing:</strong> See E2E_TESTING.md for Playwright testing guide</li>
+        </ul>
+
         <p>
-          For additional help or to report issues, please contact your Grafana administrator
-          or visit the plugin documentation repository.
+          For additional help, please check the GitHub repository documentation or contact your Grafana administrator.
         </p>
       </section>
     </div>
