@@ -47,6 +47,8 @@ type Run struct {
 	StartedAt     time.Time  `json:"started_at"`
 	FinishedAt    *time.Time `json:"finished_at,omitempty"`
 	Status        string     `json:"status"`
+	EmailSent     bool       `json:"email_sent"`           // Tracks whether email was sent successfully
+	EmailError    string     `json:"email_error,omitempty"` // Stores email sending error if any
 	ErrorText     string     `json:"error_text,omitempty"`
 	ArtifactPath  string     `json:"artifact_path,omitempty"`
 	RenderedPages int        `json:"rendered_pages"`

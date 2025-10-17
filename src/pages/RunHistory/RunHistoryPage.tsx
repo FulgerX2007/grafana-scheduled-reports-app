@@ -110,6 +110,7 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
               )}
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Started</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Status</th>
+              <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Email</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Duration</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Pages</th>
               <th style={{ textAlign: 'left', padding: '8px', borderBottom: '2px solid #ddd' }}>Size</th>
@@ -134,6 +135,13 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
               const mb = run.bytes / 1024 / 1024;
               const size = mb > 1 ? `${mb.toFixed(2)} MB` : `${(run.bytes / 1024).toFixed(2)} KB`;
 
+              // Determine email status display
+              const emailStatus = run.email_sent
+                ? { text: 'Sent', class: styles.statusSuccess }
+                : run.email_error
+                ? { text: 'Failed', class: styles.statusError, tooltip: run.email_error }
+                : { text: 'Not sent', class: styles.statusWarning };
+
               return (
                 <tr key={run.id}>
                   {!scheduleId && (
@@ -147,6 +155,14 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
                     <span className={statusClass}>{status}</span>
                   </td>
+                  <td style={{ padding: '8px', borderBottom: '1px solid #eee' }} title={emailStatus.tooltip}>
+                    <span className={emailStatus.class}>{emailStatus.text}</span>
+                    {!run.email_sent && run.status === 'completed' && run.artifact_path && (
+                      <span style={{ marginLeft: '4px', fontSize: '0.9em', opacity: 0.8 }}>
+                        (download available)
+                      </span>
+                    )}
+                  </td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{duration}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{run.rendered_pages}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{size}</td>
@@ -154,8 +170,13 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
                     {run.status === 'completed' && run.artifact_path ? (
                       // @ts-ignore
-                      <Button size="sm" variant="secondary" icon="download-alt" onClick={() => downloadArtifact(run.id)}>
-                        Download
+                      <Button
+                        size="sm"
+                        variant={!run.email_sent ? "primary" : "secondary"}
+                        icon="download-alt"
+                        onClick={() => downloadArtifact(run.id)}
+                      >
+                        Download PDF
                       </Button>
                     ) : null}
                   </td>
@@ -186,6 +207,9 @@ const getStyles = (theme: GrafanaTheme2) => ({
     color: ${theme.colors.error.text};
   `,
   statusPending: css`
+    color: ${theme.colors.warning.text};
+  `,
+  statusWarning: css`
     color: ${theme.colors.warning.text};
   `,
 });

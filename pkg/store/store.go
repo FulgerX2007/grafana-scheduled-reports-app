@@ -161,6 +161,10 @@ func (s *Store) migrate() error {
 			ELSE '0 0 * * *'
 		 END
 		 WHERE cron_expr IS NULL OR cron_expr = ''`,
+		// Migration: Add email_sent field to track email delivery status
+		`ALTER TABLE runs ADD COLUMN email_sent INTEGER NOT NULL DEFAULT 0`,
+		// Migration: Add email_error field to store email sending errors
+		`ALTER TABLE runs ADD COLUMN email_error TEXT`,
 	}
 
 	for _, migration := range migrations {
@@ -387,10 +391,10 @@ func (s *Store) updateRunDirect(run *model.Run) error {
 	_, err := s.db.Exec(`
 		UPDATE runs SET
 			finished_at = ?, status = ?, error_text = ?, artifact_path = ?,
-			rendered_pages = ?, bytes = ?, checksum = ?
+			rendered_pages = ?, bytes = ?, checksum = ?, email_sent = ?, email_error = ?
 		WHERE id = ?`,
 		run.FinishedAt, run.Status, run.ErrorText, run.ArtifactPath,
-		run.RenderedPages, run.Bytes, run.Checksum, run.ID,
+		run.RenderedPages, run.Bytes, run.Checksum, run.EmailSent, run.EmailError, run.ID,
 	)
 	return err
 }
@@ -399,17 +403,17 @@ func (s *Store) updateRunDirect(run *model.Run) error {
 func (s *Store) GetRun(orgID, id int64) (*model.Run, error) {
 	run := &model.Run{}
 	var finishedAt sql.NullTime
-	var errorText, artifactPath, checksum sql.NullString
+	var errorText, artifactPath, checksum, emailError sql.NullString
 
 	err := s.db.QueryRow(`
 		SELECT id, schedule_id, org_id, started_at, finished_at, status, error_text,
-		       artifact_path, rendered_pages, bytes, checksum, created_at
+		       artifact_path, rendered_pages, bytes, checksum, email_sent, email_error, created_at
 		FROM runs WHERE id = ? AND org_id = ?`,
 		id, orgID,
 	).Scan(
 		&run.ID, &run.ScheduleID, &run.OrgID, &run.StartedAt, &finishedAt,
 		&run.Status, &errorText, &artifactPath, &run.RenderedPages,
-		&run.Bytes, &checksum, &run.CreatedAt,
+		&run.Bytes, &checksum, &run.EmailSent, &emailError, &run.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("run not found")
@@ -431,6 +435,9 @@ func (s *Store) GetRun(orgID, id int64) (*model.Run, error) {
 	if checksum.Valid {
 		run.Checksum = checksum.String
 	}
+	if emailError.Valid {
+		run.EmailError = emailError.String
+	}
 
 	return run, nil
 }
@@ -439,7 +446,7 @@ func (s *Store) GetRun(orgID, id int64) (*model.Run, error) {
 func (s *Store) ListRuns(orgID, scheduleID int64) ([]*model.Run, error) {
 	rows, err := s.db.Query(`
 		SELECT id, schedule_id, org_id, started_at, finished_at, status, error_text,
-		       artifact_path, rendered_pages, bytes, checksum, created_at
+		       artifact_path, rendered_pages, bytes, checksum, email_sent, email_error, created_at
 		FROM runs WHERE schedule_id = ? AND org_id = ? ORDER BY started_at DESC LIMIT 50`,
 		scheduleID, orgID,
 	)
@@ -452,12 +459,12 @@ func (s *Store) ListRuns(orgID, scheduleID int64) ([]*model.Run, error) {
 	for rows.Next() {
 		run := &model.Run{}
 		var finishedAt sql.NullTime
-		var errorText, artifactPath, checksum sql.NullString
+		var errorText, artifactPath, checksum, emailError sql.NullString
 
 		err := rows.Scan(
 			&run.ID, &run.ScheduleID, &run.OrgID, &run.StartedAt, &finishedAt,
 			&run.Status, &errorText, &artifactPath, &run.RenderedPages,
-			&run.Bytes, &checksum, &run.CreatedAt,
+			&run.Bytes, &checksum, &run.EmailSent, &emailError, &run.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -475,6 +482,9 @@ func (s *Store) ListRuns(orgID, scheduleID int64) ([]*model.Run, error) {
 		}
 		if checksum.Valid {
 			run.Checksum = checksum.String
+		}
+		if emailError.Valid {
+			run.EmailError = emailError.String
 		}
 
 		runs = append(runs, run)

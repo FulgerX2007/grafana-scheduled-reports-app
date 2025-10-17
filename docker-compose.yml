@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: sheduled-reports-app
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: scheduled-reports-app
       # Rendering now handled by plugin with embedded Chromium
       GF_LOG_LEVEL: debug
       GF_DEFAULT_APP_MODE: development
@@ -23,8 +23,9 @@ services:
       GF_SMTP_FROM_NAME: ${GF_SMTP_FROM_NAME:-Grafana Reports}
       GF_SMTP_SKIP_VERIFY: true
     volumes:
-      - ./dist:/var/lib/grafana/plugins/sheduled-reports-app
+      - ./dist:/var/lib/grafana/plugins/scheduled-reports-app
       - grafana-storage:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
     # Install Chromium for plugin rendering
     user: root
     entrypoint: >

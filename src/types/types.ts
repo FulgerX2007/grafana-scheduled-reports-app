@@ -48,6 +48,8 @@ export interface Run {
   started_at: string;
   finished_at?: string;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  email_sent: boolean;
+  email_error?: string;
   error_text?: string;
   artifact_path?: string;
   rendered_pages: number;
