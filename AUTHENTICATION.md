@@ -9,7 +9,7 @@ The Scheduled Reports plugin uses **Grafana Managed Service Accounts** for authe
 ### 1. Automatic Service Account Creation
 
 When the plugin starts, Grafana automatically:
-1. Creates a service account for the plugin (named `extsvc-sheduled-reports-app`)
+1. Creates a service account for the plugin (named `extsvc-scheduled-reports-app`)
 2. Grants permissions defined in `plugin.json` IAM section
 3. Makes the token available via the Grafana SDK
 
@@ -196,7 +196,7 @@ Trigger at least one HTTP request to the plugin before running schedules:
 
 1. **Check service account permissions** in Grafana:
    - Go to: **Administration → Service accounts**
-   - Find: `extsvc-sheduled-reports-app`
+   - Find: `extsvc-scheduled-reports-app`
    - Verify it has permissions to access the dashboard
 
 2. **Verify dashboard folder permissions**:
@@ -286,9 +286,9 @@ services:
     image: grafana/grafana:latest
     environment:
       - GF_FEATURE_TOGGLES_ENABLE=externalServiceAccounts
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=sheduled-reports-app
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=scheduled-reports-app
     volumes:
-      - ./dist:/var/lib/grafana/plugins/sheduled-reports-app
+      - ./dist:/var/lib/grafana/plugins/scheduled-reports-app
 ```
 
 ## Migration from Manual Service Accounts

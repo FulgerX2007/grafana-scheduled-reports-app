@@ -1,4 +1,4 @@
-module github.com/yourusername/sheduled-reports-app
+module github.com/yourusername/scheduled-reports-app
 
 go 1.24.6
 

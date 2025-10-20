@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // TestRenderDashboard_Integration tests actual browser rendering

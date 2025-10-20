@@ -1,6 +1,25 @@
 services:
+  # Build service to compile the gpx binary for Alpine
+  build-backend:
+    image: golang:1.25-alpine
+    working_dir: /build
+    volumes:
+      - .:/build
+    command: >
+      sh -c "
+      echo 'Building backend binary for Alpine...' &&
+      apk add --no-cache git &&
+      CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags='-w -s' -o dist/gpx_reporting_linux_amd64 ./cmd/backend &&
+      chmod +x dist/gpx_reporting_linux_amd64 &&
+      echo 'Backend binary built successfully'
+      "
+    
+
   grafana:
     image: grafana/grafana:12.2.0
+    depends_on:
+      build-backend:
+        condition: service_completed_successfully
     ports:
       - "3000:3000"
     environment:

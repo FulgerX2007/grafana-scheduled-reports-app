@@ -29,7 +29,7 @@ sudo systemctl restart grafana-server
 
 **Done!** Your plugin is now ready to render dashboards.
 
-**Note**: The managed service account will be named `extsvc-sheduled-reports-app` (using `extsvc-` prefix). You can find it in Grafana Admin → Configuration → Service Accounts.
+**Note**: The managed service account will be named `extsvc-scheduled-reports-app` (using `extsvc-` prefix). You can find it in Grafana Admin → Configuration → Service Accounts.
 
 ---
 
@@ -256,7 +256,7 @@ services:
     image: grafana/grafana:latest
     environment:
       - GF_FEATURE_TOGGLES_ENABLE=externalServiceAccounts
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=sheduled-reports-app
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=scheduled-reports-app
     volumes:
       - ./dist:/var/lib/grafana/plugins/scheduled-reports-app
       - ./chrome-linux64:/opt/chrome  # Bundle Chrome

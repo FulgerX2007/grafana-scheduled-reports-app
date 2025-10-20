@@ -37,19 +37,19 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
       if (scheduleId) {
         // Load runs for specific schedule
         response = await getBackendSrv().get(
-          `/api/plugins/sheduled-reports-app/resources/api/schedules/${scheduleId}/runs`
+          `/api/plugins/scheduled-reports-app/resources/api/schedules/${scheduleId}/runs`
         );
         setRuns(response.runs || []);
       } else {
         // Load all runs from all schedules
-        const schedulesResponse = await getBackendSrv().get('/api/plugins/sheduled-reports-app/resources/api/schedules');
+        const schedulesResponse = await getBackendSrv().get('/api/plugins/scheduled-reports-app/resources/api/schedules');
         const schedules = schedulesResponse.schedules || schedulesResponse || [];
 
         const allRuns: RunWithSchedule[] = [];
         for (const schedule of schedules) {
           try {
             const runsResponse = await getBackendSrv().get(
-              `/api/plugins/sheduled-reports-app/resources/api/schedules/${schedule.id}/runs`
+              `/api/plugins/scheduled-reports-app/resources/api/schedules/${schedule.id}/runs`
             );
             const scheduleRuns = runsResponse.runs || [];
             // Add schedule name to each run
@@ -75,7 +75,7 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
 
   const downloadArtifact = async (runId: number) => {
     const appSubUrl = config.appSubUrl || '';
-    window.open(`${appSubUrl}/api/plugins/sheduled-reports-app/resources/api/runs/${runId}/artifact`, '_blank');
+    window.open(`${appSubUrl}/api/plugins/scheduled-reports-app/resources/api/runs/${runId}/artifact`, '_blank');
   };
 
   if (loading) {

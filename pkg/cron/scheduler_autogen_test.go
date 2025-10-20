@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // TestAutoGenerateCronExpr tests that cron_expr is auto-generated when empty

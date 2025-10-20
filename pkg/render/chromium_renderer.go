@@ -15,7 +15,7 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // ChromiumRenderer handles dashboard rendering using Chromium

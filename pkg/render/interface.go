@@ -3,7 +3,7 @@ package render
 import (
 	"context"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // Backend defines the interface for rendering backends

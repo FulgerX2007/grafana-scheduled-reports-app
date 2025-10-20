@@ -280,7 +280,7 @@ See E2E_TESTING.md for Playwright setup
 
 ## 🔌 API Reference
 
-Base path: `/api/plugins/sheduled-reports-app/resources/api`
+Base path: `/api/plugins/scheduled-reports-app/resources/api`
 
 ### Schedules
 
@@ -315,7 +315,7 @@ Base path: `/api/plugins/sheduled-reports-app/resources/api`
 ### Example: Create Schedule
 
 ```bash
-curl -X POST "http://localhost:3000/api/plugins/sheduled-reports-app/resources/api/schedules" \
+curl -X POST "http://localhost:3000/api/plugins/scheduled-reports-app/resources/api/schedules" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -408,7 +408,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 - **Issues**: [GitHub Issues](https://github.com/FulgerX2007/grafana-scheduled-reports-app/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/FulgerX2007/grafana-scheduled-reports-app/discussions)
-- **Documentation**: [Built-in docs](http://localhost:3000/a/sheduled-reports-app/documentation) (Apps → Scheduled Reports → Documentation)
+- **Documentation**: [Built-in docs](http://localhost:3000/a/scheduled-reports-app/documentation) (Apps → Scheduled Reports → Documentation)
 
 ---
 

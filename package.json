@@ -1,5 +1,5 @@
 {
-  "name": "sheduled-reports-app",
+  "name": "scheduled-reports-app",
   "version": "0.0.1",
   "description": "Grafana app plugin for scheduled dashboard reporting",
   "scripts": {

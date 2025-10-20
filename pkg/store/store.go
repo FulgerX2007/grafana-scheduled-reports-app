@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
-	
+	_ "modernc.org/sqlite" // Register SQLite driver
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // parseTimestamp parses a timestamp string from SQLite, handling multiple formats
@@ -169,7 +170,11 @@ func (s *Store) migrate() error {
 
 	for _, migration := range migrations {
 		if _, err := s.db.Exec(migration); err != nil {
-			return fmt.Errorf("migration failed: %w", err)
+			// Ignore "duplicate column" errors - column already exists
+			if !strings.Contains(err.Error(), "duplicate column name") {
+				return fmt.Errorf("migration failed: %w", err)
+			}
+			log.Printf("[STORE] Migration warning (ignored): %v", err)
 		}
 	}
 

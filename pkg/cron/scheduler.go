@@ -12,10 +12,10 @@ import (
 
 	"github.com/gorhill/cronexpr"
 	"github.com/robfig/cron/v3"
-	"github.com/yourusername/sheduled-reports-app/pkg/mail"
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
-	"github.com/yourusername/sheduled-reports-app/pkg/render"
-	"github.com/yourusername/sheduled-reports-app/pkg/store"
+	"github.com/yourusername/scheduled-reports-app/pkg/mail"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/render"
+	"github.com/yourusername/scheduled-reports-app/pkg/store"
 )
 
 // Scheduler handles report scheduling

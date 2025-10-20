@@ -145,7 +145,7 @@ Replace all occurrences of old repository URLs:
 ```bash
 # Find and replace in README.md:
 # FROM: https://github.com/yourusername/scheduled-reports-app
-# FROM: https://github.com/FulgerX2007/grafana-sheduled-reports
+# FROM: https://github.com/FulgerX2007/grafana-scheduled-reports
 # TO:   https://github.com/FulgerX2007/grafana-scheduled-reports-app
 ```
 
@@ -182,7 +182,7 @@ Verify all metadata is correct:
 
 ```json
 {
-  "id": "sheduled-reports-app",
+  "id": "scheduled-reports-app",
   "name": "Scheduled Reports",
   "version": "1.0.0",  // Bump to stable version
   "info": {
@@ -394,7 +394,7 @@ Congratulations! Your plugin is now **community signed**:
    }
    ```
 3. **Plugin works on any Grafana instance** - no rootUrls restriction!
-4. **Listed in catalog**: https://grafana.com/grafana/plugins/sheduled-reports-app
+4. **Listed in catalog**: https://grafana.com/grafana/plugins/scheduled-reports-app
 
 **Update CI/CD:**
 - Remove private signing step from `.gitlab-ci.yml`
