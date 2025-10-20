@@ -383,6 +383,11 @@ func (h *Handler) handleSettings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Clear renderer cache to force recreation with new settings
+		if err := h.scheduler.ClearRendererCache(orgID); err != nil {
+			log.Printf("Warning: Failed to clear renderer cache for org %d: %v", orgID, err)
+		}
+
 		respondJSON(w, settings)
 
 	default:

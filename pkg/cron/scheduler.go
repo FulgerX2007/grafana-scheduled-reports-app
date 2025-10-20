@@ -404,3 +404,25 @@ func (s *Scheduler) calculateNextRun(schedule *model.Schedule) time.Time {
 	// Strip monotonic clock reading by truncating to second precision
 	return nextRun.UTC().Truncate(time.Second)
 }
+
+// ClearRendererCache closes and removes renderer instances for the given org ID
+// This forces new renderers to be created with updated settings on next render
+func (s *Scheduler) ClearRendererCache(orgID int64) error {
+	s.cacheMutex.Lock()
+	defer s.cacheMutex.Unlock()
+
+	// Close existing renderer if it exists
+	if renderer, exists := s.renderers[orgID]; exists {
+		if err := renderer.Close(); err != nil {
+			log.Printf("Warning: Failed to close renderer for org %d: %v", orgID, err)
+		}
+		delete(s.renderers, orgID)
+		log.Printf("Cleared renderer cache for org %d", orgID)
+	}
+
+	// Also clear settings cache to force reload
+	delete(s.settingsCache, orgID)
+	log.Printf("Cleared settings cache for org %d", orgID)
+
+	return nil
+}
