@@ -322,11 +322,18 @@ func (r *ChromiumRenderer) RenderDashboard(ctx context.Context, schedule *model.
 	}
 	defer cleanup()
 
-	// Viewport
+	// Viewport - use a tall viewport to capture all panels without scrolling
+	// Default config height is 1080, but we'll use 3000px to capture below-fold content
+	viewportHeight := r.config.ViewportHeight
+	if viewportHeight < 3000 {
+		viewportHeight = 3000
+		log.Printf("DEBUG: Increasing viewport height from %d to %d to capture below-fold panels", r.config.ViewportHeight, viewportHeight)
+	}
+
 	if err := page.SetViewport(
 		&proto.EmulationSetDeviceMetricsOverride{
 			Width:             r.config.ViewportWidth,
-			Height:            r.config.ViewportHeight,
+			Height:            viewportHeight,
 			DeviceScaleFactor: r.config.DeviceScaleFactor,
 			Mobile:            false,
 		},
@@ -378,87 +385,9 @@ func (r *ChromiumRenderer) RenderDashboard(ctx context.Context, schedule *model.
 		});
 	}`)
 
-	// Wait for panels to appear and render
+	// STEP 2: Wait for panels to render with the tall viewport
 	time.Sleep(time.Duration(r.config.DelayMS) * time.Millisecond)
-	log.Printf("DEBUG: Waited %dms for panels to render", r.config.DelayMS)
-
-	// STEP 2: Calculate required viewport height to capture ALL panels
-	// Modern Grafana uses fixed-height layouts in kiosk mode that don't expand naturally
-	log.Printf("DEBUG: Calculating required height to capture all panels...")
-
-	heightResult, err := page.Eval(`() => {
-		const panels = Array.from(document.querySelectorAll('[data-panelid]'));
-		if (panels.length === 0) {
-			return {
-				success: false,
-				panelCount: 0,
-				requiredHeight: window.innerHeight
-			};
-		}
-
-		// Calculate the bottommost point of all panels
-		let maxBottom = 0;
-		panels.forEach(panel => {
-			const rect = panel.getBoundingClientRect();
-			const bottom = rect.bottom + window.scrollY;
-			if (bottom > maxBottom) {
-				maxBottom = bottom;
-			}
-		});
-
-		// Add some padding (100px) for safety
-		const requiredHeight = Math.ceil(maxBottom) + 100;
-
-		return {
-			success: true,
-			panelCount: panels.length,
-			currentHeight: window.innerHeight,
-			requiredHeight: requiredHeight,
-			needsResize: requiredHeight > window.innerHeight
-		};
-	}`)
-
-	if err != nil {
-		log.Printf("WARNING: Failed to calculate required height: %v", err)
-	} else {
-		panelCount := int(heightResult.Value.Get("panelCount").Num())
-		currentHeight := int(heightResult.Value.Get("currentHeight").Num())
-		requiredHeight := int(heightResult.Value.Get("requiredHeight").Num())
-		needsResize := heightResult.Value.Get("needsResize").Bool()
-
-		log.Printf("DEBUG: Found %d panels - current viewport:%dpx required:%dpx needsResize:%v",
-			panelCount, currentHeight, requiredHeight, needsResize)
-
-		// Validate and bound the required height
-		if requiredHeight <= 0 || requiredHeight > 10000 {
-			log.Printf("WARNING: Invalid required height %dpx, using default", requiredHeight)
-			requiredHeight = currentHeight
-			needsResize = false
-		}
-
-		if needsResize && requiredHeight > currentHeight && requiredHeight <= 10000 {
-			// Resize viewport to capture all panels
-			log.Printf("DEBUG: Resizing viewport from %dpx to %dpx to capture all panels", currentHeight, requiredHeight)
-
-			if err := page.SetViewport(
-				&proto.EmulationSetDeviceMetricsOverride{
-					Width:             r.config.ViewportWidth,
-					Height:            requiredHeight,
-					DeviceScaleFactor: r.config.DeviceScaleFactor,
-					Mobile:            false,
-				},
-			); err != nil {
-				log.Printf("WARNING: Failed to resize viewport: %v", err)
-			} else {
-				// Wait for layout to stabilize after resize
-				time.Sleep(time.Duration(r.config.DelayMS) * time.Millisecond)
-				log.Printf("DEBUG: Viewport resized and layout stabilized")
-			}
-		} else if panelCount == 0 {
-			log.Printf("WARNING: No panels found - dashboard may not have loaded yet")
-		}
-		// Note: Removed old scrolling code - viewport resize approach is superior
-	}
+	log.Printf("DEBUG: Waited %dms for panels to render in tall viewport", r.config.DelayMS)
 
 	// STEP 3: Wait for network idle and all panel queries to complete
 	log.Printf("DEBUG: Waiting for network to settle and panels to finish loading...")
