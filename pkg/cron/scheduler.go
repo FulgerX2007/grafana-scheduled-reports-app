@@ -250,19 +250,25 @@ func (s *Scheduler) executeScheduleOnce(schedule *model.Schedule, run *model.Run
 		log.Printf("DEBUG: Using default Grafana URL: %s", grafanaURL)
 	}
 
-	log.Printf("DEBUG: Rendering with grafanaURL=%s using Chromium backend (managed service account)", grafanaURL)
+	// Determine which backend to use (default to Chromium if not specified)
+	backendType := render.BackendChromium
+	if settings.RendererConfig.Backend != "" {
+		backendType = render.BackendType(settings.RendererConfig.Backend)
+	}
+
+	log.Printf("DEBUG: Rendering with grafanaURL=%s using %s backend (managed service account)", grafanaURL, backendType)
 
 	// Get or create renderer for this org (reuse renderer instance)
 	renderer, exists := s.renderers[schedule.OrgID]
 	if !exists {
-		// Create new Chromium renderer
+		// Create new renderer with configured backend
 		var err error
-		renderer, err = render.NewBackend(render.BackendChromium, grafanaURL, settings.RendererConfig)
+		renderer, err = render.NewBackend(backendType, grafanaURL, settings.RendererConfig)
 		if err != nil {
-			return fmt.Errorf("failed to create Chromium renderer: %w", err)
+			return fmt.Errorf("failed to create %s renderer: %w", backendType, err)
 		}
 		s.renderers[schedule.OrgID] = renderer
-		log.Printf("Created new Chromium renderer for org %d with URL %s", schedule.OrgID, grafanaURL)
+		log.Printf("Created new %s renderer for org %d with URL %s", backendType, schedule.OrgID, grafanaURL)
 	}
 
 	// Render dashboard (token will be retrieved from context inside renderer)

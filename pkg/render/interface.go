@@ -22,12 +22,22 @@ type Backend interface {
 type BackendType string
 
 const (
-	// BackendChromium is the Chromium-based renderer (only supported backend)
+	// BackendChromium is the Chromium-based renderer using go-rod
 	BackendChromium BackendType = "chromium"
+	// BackendPlaywright is the Playwright-based renderer (recommended for better reliability)
+	BackendPlaywright BackendType = "playwright"
 )
 
-// NewBackend creates a new Chromium rendering backend
+// NewBackend creates a new rendering backend based on the specified type
 func NewBackend(backendType BackendType, grafanaURL string, config model.RendererConfig) (Backend, error) {
-	// Only Chromium backend is supported
-	return NewChromiumRenderer(grafanaURL, config), nil
+	switch backendType {
+	case BackendPlaywright:
+		return NewPlaywrightRenderer(grafanaURL, config), nil
+	case BackendChromium:
+		return NewChromiumRenderer(grafanaURL, config), nil
+	default:
+		// Default to Chromium (rod) for better Alpine/Docker compatibility
+		// Playwright requires Node.js driver which doesn't work well in Alpine
+		return NewChromiumRenderer(grafanaURL, config), nil
+	}
 }

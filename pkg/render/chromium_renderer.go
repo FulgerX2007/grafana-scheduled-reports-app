@@ -352,58 +352,307 @@ func (r *ChromiumRenderer) RenderDashboard(ctx context.Context, schedule *model.
 		Element("div.react-grid-item").
 		Do()
 
-	// Let network settle + optional delay
-	page.WaitIdle(time.Duration(r.config.DelayMS) * time.Millisecond)
+	// STEP 1: Force all lazy-loaded content to load eagerly
+	log.Printf("DEBUG: Forcing lazy-loaded content to load eagerly...")
+	_, _ = page.Eval(`() => {
+		// Make all lazy images and iframes load immediately
+		document.querySelectorAll('img[loading="lazy"]').forEach(img => img.loading = 'eager');
+		document.querySelectorAll('iframe[loading="lazy"]').forEach(f => f.loading = 'eager');
+
+		// Common lazy loading patterns - force load data-src attributes
+		document.querySelectorAll('[data-src]').forEach(el => {
+			if (!el.src && el.dataset.src) {
+				el.src = el.dataset.src;
+			}
+		});
+		document.querySelectorAll('source[data-srcset]').forEach(s => {
+			if (s.dataset.srcset) {
+				s.srcset = s.dataset.srcset;
+			}
+		});
+
+		// Force Grafana panels to render by marking all as visible
+		document.querySelectorAll('[data-panelid]').forEach(panel => {
+			// Trigger intersection observer by making panel "visible"
+			panel.style.visibility = 'visible';
+		});
+	}`)
+
+	// Wait for panels to appear and render
+	time.Sleep(time.Duration(r.config.DelayMS) * time.Millisecond)
+	log.Printf("DEBUG: Waited %dms for panels to render", r.config.DelayMS)
+
+	// STEP 2: Calculate required viewport height to capture ALL panels
+	// Modern Grafana uses fixed-height layouts in kiosk mode that don't expand naturally
+	log.Printf("DEBUG: Calculating required height to capture all panels...")
+
+	heightResult, err := page.Eval(`() => {
+		const panels = Array.from(document.querySelectorAll('[data-panelid]'));
+		if (panels.length === 0) {
+			return {
+				success: false,
+				panelCount: 0,
+				requiredHeight: window.innerHeight
+			};
+		}
+
+		// Calculate the bottommost point of all panels
+		let maxBottom = 0;
+		panels.forEach(panel => {
+			const rect = panel.getBoundingClientRect();
+			const bottom = rect.bottom + window.scrollY;
+			if (bottom > maxBottom) {
+				maxBottom = bottom;
+			}
+		});
+
+		// Add some padding (100px) for safety
+		const requiredHeight = Math.ceil(maxBottom) + 100;
+
+		return {
+			success: true,
+			panelCount: panels.length,
+			currentHeight: window.innerHeight,
+			requiredHeight: requiredHeight,
+			needsResize: requiredHeight > window.innerHeight
+		};
+	}`)
+
+	if err != nil {
+		log.Printf("WARNING: Failed to calculate required height: %v", err)
+	} else {
+		panelCount := int(heightResult.Value.Get("panelCount").Num())
+		currentHeight := int(heightResult.Value.Get("currentHeight").Num())
+		requiredHeight := int(heightResult.Value.Get("requiredHeight").Num())
+		needsResize := heightResult.Value.Get("needsResize").Bool()
+
+		log.Printf("DEBUG: Found %d panels - current viewport:%dpx required:%dpx needsResize:%v",
+			panelCount, currentHeight, requiredHeight, needsResize)
+
+		// Validate and bound the required height
+		if requiredHeight <= 0 || requiredHeight > 10000 {
+			log.Printf("WARNING: Invalid required height %dpx, using default", requiredHeight)
+			requiredHeight = currentHeight
+			needsResize = false
+		}
+
+		if needsResize && requiredHeight > currentHeight && requiredHeight <= 10000 {
+			// Resize viewport to capture all panels
+			log.Printf("DEBUG: Resizing viewport from %dpx to %dpx to capture all panels", currentHeight, requiredHeight)
+
+			if err := page.SetViewport(
+				&proto.EmulationSetDeviceMetricsOverride{
+					Width:             r.config.ViewportWidth,
+					Height:            requiredHeight,
+					DeviceScaleFactor: r.config.DeviceScaleFactor,
+					Mobile:            false,
+				},
+			); err != nil {
+				log.Printf("WARNING: Failed to resize viewport: %v", err)
+			} else {
+				// Wait for layout to stabilize after resize
+				time.Sleep(time.Duration(r.config.DelayMS) * time.Millisecond)
+				log.Printf("DEBUG: Viewport resized and layout stabilized")
+			}
+		} else if panelCount == 0 {
+			log.Printf("WARNING: No panels found - dashboard may not have loaded yet")
+		}
+		// Note: Removed old scrolling code - viewport resize approach is superior
+	}
+
+	// STEP 3: Wait for network idle and all panel queries to complete
+	log.Printf("DEBUG: Waiting for network to settle and panels to finish loading...")
+	page.WaitIdle(5 * time.Second) // Wait for initial network idle
+
+	// Additional wait for panel queries - pragmatic timeout
+	// Note: Some panels may never finish loading (misconfigured datasources, etc.)
+	// We wait a reasonable time, then proceed to avoid indefinite hangs
+	maxWaitTime := 30 * time.Second  // Pragmatic timeout: 30 seconds
+	checkInterval := 1 * time.Second
+	elapsed := time.Duration(0)
+	stableCount := 0                  // Count how many times we see 0 loading indicators
+	requiredStableChecks := 3         // Require 3 consecutive checks with 0 indicators
+	unchangedCount := 0               // Track if loading count stops changing
+	lastLoadingCount := -1
+
+	for elapsed < maxWaitTime {
+		// Enhanced check for loading indicators
+		loadingResult, err := page.Eval(`() => {
+			// Count Grafana-specific loading indicators
+			const spinners = document.querySelectorAll('.panel-loading, .fa-spinner, .fa-spin, [class*="loading"]');
+			const skeletons = document.querySelectorAll('[class*="skeleton"]');
+			const loadingPanels = document.querySelectorAll('[data-testid*="loading"]');
+
+			// Grafana-specific: panels with "loading" in aria-label
+			const ariaLoading = document.querySelectorAll('[aria-label*="loading" i]');
+
+			// Check for empty panels that might still be loading
+			const emptyPanels = Array.from(document.querySelectorAll('[data-panelid]')).filter(panel => {
+				// Check if panel is visible but has no rendered content
+				const hasCanvas = panel.querySelector('canvas');
+				const hasText = panel.textContent.trim().length > 0;
+				const hasImage = panel.querySelector('img');
+				const hasSvg = panel.querySelector('svg');
+				return panel.offsetParent !== null && !hasCanvas && !hasText && !hasImage && !hasSvg;
+			});
+
+			// Check for "Loading" or "Waiting" text in visible elements
+			const loadingText = Array.from(document.querySelectorAll('*')).filter(el => {
+				const text = el.textContent.toLowerCase();
+				return (text.includes('loading') || text.includes('waiting') || text.includes('querying')) &&
+				       el.offsetParent !== null &&
+				       el.children.length === 0; // Only leaf nodes
+			});
+
+			return {
+				spinners: spinners.length,
+				skeletons: skeletons.length,
+				loadingPanels: loadingPanels.length,
+				ariaLoading: ariaLoading.length,
+				emptyPanels: emptyPanels.length,
+				loadingText: loadingText.length,
+				total: spinners.length + skeletons.length + loadingPanels.length + ariaLoading.length + emptyPanels.length + loadingText.length
+			};
+		}`)
+
+		if err == nil {
+			result := loadingResult.Value.Get("total")
+			loadingCount := int(result.Num())
+
+			if loadingCount == 0 {
+				stableCount++
+				log.Printf("DEBUG: No loading indicators found (stable check %d/%d)", stableCount, requiredStableChecks)
+
+				if stableCount >= requiredStableChecks {
+					log.Printf("DEBUG: All panels finished loading (verified with %d stable checks)", requiredStableChecks)
+					break
+				}
+			} else {
+				stableCount = 0 // Reset if we see loading indicators again
+
+				// Check if loading count is stuck (not changing)
+				if loadingCount == lastLoadingCount {
+					unchangedCount++
+					if unchangedCount >= 5 {
+						// Loading count hasn't changed for 5 seconds - likely stuck panels
+						log.Printf("DEBUG: Loading count unchanged for %d checks (%d indicators) - likely stuck panels, proceeding anyway",
+							unchangedCount, loadingCount)
+						break
+					}
+				} else {
+					unchangedCount = 0
+					lastLoadingCount = loadingCount
+				}
+
+				// Log detailed breakdown
+				spinners := int(loadingResult.Value.Get("spinners").Num())
+				skeletons := int(loadingResult.Value.Get("skeletons").Num())
+				panels := int(loadingResult.Value.Get("loadingPanels").Num())
+				aria := int(loadingResult.Value.Get("ariaLoading").Num())
+				empty := int(loadingResult.Value.Get("emptyPanels").Num())
+				text := int(loadingResult.Value.Get("loadingText").Num())
+
+				log.Printf("DEBUG: Still loading - spinners:%d skeletons:%d panels:%d aria:%d empty:%d text:%d (total:%d)",
+					spinners, skeletons, panels, aria, empty, text, loadingCount)
+			}
+		}
+
+		time.Sleep(checkInterval)
+		elapsed += checkInterval
+	}
+
+	if elapsed >= maxWaitTime {
+		log.Printf("WARNING: Timeout waiting for all panels to load (waited %v, %d stable checks achieved)", maxWaitTime, stableCount)
+		log.Printf("WARNING: Some panels may be incomplete in the PDF")
+	}
+
+	// STEP 5: Extra delay if configured
 	if r.config.DelayMS > 0 {
+		log.Printf("DEBUG: Applying configured delay: %dms", r.config.DelayMS)
 		time.Sleep(time.Duration(r.config.DelayMS) * time.Millisecond)
 	}
 
-	// Calculate actual page height dynamically to capture full content
-	// Use document.documentElement.scrollHeight to get total scrollable height
-	contentHeightPx := float64(r.config.ViewportHeight) // Default fallback
-	heightResult, err := page.Eval(`() => document.documentElement.scrollHeight`)
-	if err != nil {
-		log.Printf("WARNING: Failed to get page height, using viewport height (%dpx): %v", r.config.ViewportHeight, err)
-	} else {
-		contentHeightPx = heightResult.Value.Num()
-	}
-	log.Printf("DEBUG: Calculated content height: %.0fpx", contentHeightPx)
+	// STEP 6: Get final content dimensions
+	log.Printf("DEBUG: Calculating final content dimensions...")
 
-	// Convert pixels to inches (Chrome uses 96 DPI, not 72 DPI)
-	// 96 DPI is Chrome's standard for screen rendering
-	paperWidthInches := float64(r.config.ViewportWidth) / 96.0
+	// Get actual rendered content size using JavaScript
+	contentWidthPx := float64(r.config.ViewportWidth)   // Fallback
+	contentHeightPx := float64(r.config.ViewportHeight) // Fallback
+
+	widthResult, err := page.Eval(`() => {
+		// Get the maximum of scroll width, offset width, and client width
+		const body = document.body;
+		const html = document.documentElement;
+		return Math.max(
+			body.scrollWidth, body.offsetWidth,
+			html.clientWidth, html.scrollWidth, html.offsetWidth
+		);
+	}`)
+	if err == nil {
+		contentWidthPx = widthResult.Value.Num()
+	} else {
+		log.Printf("WARNING: Failed to get content width: %v", err)
+	}
+
+	finalHeightResult, err := page.Eval(`() => {
+		// Get the maximum of scroll height, offset height, and client height
+		const body = document.body;
+		const html = document.documentElement;
+		return Math.max(
+			body.scrollHeight, body.offsetHeight,
+			html.clientHeight, html.scrollHeight, html.offsetHeight
+		);
+	}`)
+	if err == nil {
+		contentHeightPx = finalHeightResult.Value.Num()
+	} else {
+		log.Printf("WARNING: Failed to get content height: %v", err)
+	}
+
+	log.Printf("DEBUG: Final content dimensions: %.0fpx x %.0fpx", contentWidthPx, contentHeightPx)
+
+	// Convert actual content dimensions to inches (Chrome uses 96 DPI)
+	paperWidthInches := contentWidthPx / 96.0
 	paperHeightInches := contentHeightPx / 96.0
 
 	// Apply minimum dimensions (prevent tiny PDFs)
 	if paperWidthInches < 8.0 {
+		log.Printf("DEBUG: Content width %.2f\" too small, setting to 8\"", paperWidthInches)
 		paperWidthInches = 8.0
 	}
 	if paperHeightInches < 6.0 {
+		log.Printf("DEBUG: Content height %.2f\" too small, setting to 6\"", paperHeightInches)
 		paperHeightInches = 6.0
 	}
 
-	// Apply maximum dimensions (Chrome has a limit of ~200 inches)
+	// Apply maximum dimensions (Chrome PDF has a limit of ~200 inches)
 	if paperHeightInches > 200.0 {
-		log.Printf("WARNING: Content height %.2f inches exceeds Chrome limit, capping at 200 inches", paperHeightInches)
+		log.Printf("WARNING: Content height %.2f inches exceeds Chrome limit (200\"), capping at 200 inches", paperHeightInches)
+		log.Printf("WARNING: Some content may be cut off. Consider reducing viewport height or dashboard height.")
 		paperHeightInches = 200.0
+	}
+	if paperWidthInches > 200.0 {
+		log.Printf("WARNING: Content width %.2f inches exceeds Chrome limit (200\"), capping at 200 inches", paperWidthInches)
+		paperWidthInches = 200.0
 	}
 
 	log.Printf("DEBUG: PDF dimensions: %.2f\" x %.2f\" (%.0fpx x %.0fpx @ 96 DPI)",
 		paperWidthInches, paperHeightInches,
 		paperWidthInches*96, paperHeightInches*96)
 
-	// Print to PDF with dynamic height
+	// STEP 7: Generate PDF with full content capture
+	// Use zero margins to capture exact content dimensions
 	f := func(x float64) *float64 { return &x }
 	stream, err := page.PDF(
 		&proto.PagePrintToPDF{
 			PrintBackground:     true,
-			PreferCSSPageSize:   false, // Use our calculated dimensions instead of CSS @page rules
+			PreferCSSPageSize:   false, // Use our calculated dimensions
 			PaperWidth:          f(paperWidthInches),
 			PaperHeight:         f(paperHeightInches),
-			MarginTop:           f(0.4),
-			MarginBottom:        f(0.4),
-			MarginLeft:          f(0.4),
-			MarginRight:         f(0.4),
+			MarginTop:           f(0.0), // Zero margins for full content
+			MarginBottom:        f(0.0),
+			MarginLeft:          f(0.0),
+			MarginRight:         f(0.0),
 			DisplayHeaderFooter: false,
 			Scale:               f(1.0),
 		},
@@ -411,6 +660,8 @@ func (r *ChromiumRenderer) RenderDashboard(ctx context.Context, schedule *model.
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate PDF: %w", err)
 	}
+
+	log.Printf("DEBUG: PDF generated successfully")
 
 	pdf, err := io.ReadAll(stream)
 	if err != nil {

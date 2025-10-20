@@ -23,8 +23,14 @@ Scheduled Reports is a comprehensive Grafana app plugin that brings enterprise-g
 - **Manual Execution**: Trigger any report on-demand
 
 ### 📊 High-Fidelity Rendering
-- **Chromium-Based**: Uses go-rod for pixel-perfect dashboard rendering
-- **Direct PDF Generation**: Chrome DevTools Protocol for native PDF output
+- **Enhanced Chromium Backend** (Default & Recommended):
+  - Best compatibility with Docker/Alpine Linux environments
+  - Progressive scrolling to trigger all lazy-loaded panels
+  - Automatic waiting for network idle and loading indicators
+  - Full content capture with dynamic dimension calculation
+  - Per-organization browser reuse for optimal performance
+- **Experimental Playwright Backend**: Available for Ubuntu/Debian (requires Node.js driver)
+- **Direct PDF Generation**: Native PDF output with configurable dimensions
 - **Full JavaScript Support**: Handles complex dashboards with animations and dynamic content
 - **Configurable Quality**: Adjust viewport size, scale factor, and rendering delays
 - **Per-Org Browser Reuse**: Efficient resource management with lazy initialization
@@ -58,7 +64,7 @@ Scheduled Reports is a comprehensive Grafana app plugin that brings enterprise-g
 
 - **Grafana**: Version 11.6.0 or higher (11.6+ recommended for managed service accounts)
 - **Chromium/Chrome**: Required for PDF rendering
-  - System package: `chromium-browser` or `google-chrome`
+  - System package: `chromium-browser` or `google-chrome` (recommended for Docker/Alpine)
   - Standalone binary: Chrome for Testing (auto-downloaded in Docker)
   - Auto-detected from common paths if not configured
 - **SMTP Server**: For email delivery (Gmail, SendGrid, etc.)
