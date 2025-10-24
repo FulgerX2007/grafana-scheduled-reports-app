@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
   "name": "Scheduled Reports",
-  "id": "scheduled-reports-app",
+  "id": "fulgerx2007-scheduled-reports-app",
   "info": {
     "description": "Automated dashboard reporting with Chromium-based PDF generation, email delivery, and flexible scheduling (daily, weekly, monthly, or custom cron expressions)",
     "author": {
@@ -57,7 +57,7 @@
     {
       "type": "page",
       "name": "Scheduled Reports",
-      "path": "/a/scheduled-reports-app",
+      "path": "/a/fulgerx2007-scheduled-reports-app",
       "role": "Editor",
       "addToNav": true,
       "defaultNav": true
@@ -65,35 +65,35 @@
     {
       "type": "page",
       "name": "Create Schedule",
-      "path": "/a/scheduled-reports-app/schedule/new",
+      "path": "/a/fulgerx2007-scheduled-reports-app/schedule/new",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Edit Schedule",
-      "path": "/a/scheduled-reports-app/schedule/edit",
+      "path": "/a/fulgerx2007-scheduled-reports-app/schedule/edit",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Run History",
-      "path": "/a/scheduled-reports-app/history",
+      "path": "/a/fulgerx2007-scheduled-reports-app/history",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Documentation",
-      "path": "/a/scheduled-reports-app/documentation",
+      "path": "/a/fulgerx2007-scheduled-reports-app/documentation",
       "role": "Viewer",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Settings",
-      "path": "/a/scheduled-reports-app/settings",
+      "path": "/a/fulgerx2007-scheduled-reports-app/settings",
       "role": "Admin",
       "addToNav": false
     }
