@@ -64,25 +64,6 @@ jobs:
           CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../../dist/gpx_reporting_darwin_arm64
           chmod +x ../../dist/gpx_reporting_darwin_arm64
 
-      - name: Sign plugin
-        run: |
-          echo "Signing plugin with Grafana signing tool..."
-          export GRAFANA_ACCESS_POLICY_TOKEN="${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}"
-          npx --yes @grafana/sign-plugin@latest
-        env:
-          GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
-
-      - name: Verify plugin signature
-        run: |
-          if [ -f "dist/MANIFEST.txt" ]; then
-            echo "✅ Plugin signed successfully"
-            echo "=== MANIFEST.txt contents ==="
-            cat dist/MANIFEST.txt
-          else
-            echo "❌ ERROR: Plugin signing failed - MANIFEST.txt not found"
-            exit 1
-          fi
-
       - name: Package plugin for Linux (amd64)
         run: |
           # Copy the platform-specific backend binary to dist
