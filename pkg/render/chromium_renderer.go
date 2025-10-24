@@ -322,18 +322,11 @@ func (r *ChromiumRenderer) RenderDashboard(ctx context.Context, schedule *model.
 	}
 	defer cleanup()
 
-	// Viewport - use a tall viewport to capture all panels without scrolling
-	// Default config height is 1080, but we'll use 3000px to capture below-fold content
-	viewportHeight := r.config.ViewportHeight
-	if viewportHeight < 3000 {
-		viewportHeight = 3000
-		log.Printf("DEBUG: Increasing viewport height from %d to %d to capture below-fold panels", r.config.ViewportHeight, viewportHeight)
-	}
-
+	// Set viewport to configured dimensions
 	if err := page.SetViewport(
 		&proto.EmulationSetDeviceMetricsOverride{
 			Width:             r.config.ViewportWidth,
-			Height:            viewportHeight,
+			Height:            r.config.ViewportHeight,
 			DeviceScaleFactor: r.config.DeviceScaleFactor,
 			Mobile:            false,
 		},
