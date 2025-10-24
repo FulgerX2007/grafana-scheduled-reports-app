@@ -10,13 +10,42 @@
       "url": "https://github.com/FulgerX2007/"
     },
     "keywords": ["reporting", "pdf", "email", "scheduler", "chromium", "automation", "dashboard", "export"],
-    "version": "0.0.1",
-    "updated": "%TODAY%",
+    "version": "1.0.0",
+    "updated": "2025-10-24",
     "logos": {
       "small": "img/logo.png",
       "large": "img/logo.png"
     },
-    "screenshots": [],
+    "screenshots": [
+      {
+        "name": "Schedules List",
+        "path": "img/screenshots/Schedules.png"
+      },
+      {
+        "name": "Run History",
+        "path": "img/screenshots/Run_History.png"
+      },
+      {
+        "name": "Settings - Service Account",
+        "path": "img/screenshots/Settings_1.png"
+      },
+      {
+        "name": "Settings - SMTP Configuration",
+        "path": "img/screenshots/Settings_2.png"
+      },
+      {
+        "name": "Settings - Renderer Configuration",
+        "path": "img/screenshots/Settings_3.png"
+      },
+      {
+        "name": "Settings - Limits and Quotas",
+        "path": "img/screenshots/Settings_4.png"
+      },
+      {
+        "name": "Documentation",
+        "path": "img/screenshots/Documentaion.png"
+      }
+    ],
     "links": [
       {
         "name": "Documentation",
