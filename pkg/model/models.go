@@ -50,7 +50,8 @@ type Run struct {
 	EmailSent     bool       `json:"email_sent"`           // Tracks whether email was sent successfully
 	EmailError    string     `json:"email_error,omitempty"` // Stores email sending error if any
 	ErrorText     string     `json:"error_text,omitempty"`
-	ArtifactPath  string     `json:"artifact_path,omitempty"`
+	ArtifactPath  string     `json:"artifact_path,omitempty"` // DEPRECATED: Kept for backward compatibility, use ArtifactData instead
+	ArtifactData  []byte     `json:"-"`                       // PDF content stored as BLOB (not exposed in JSON API)
 	RenderedPages int        `json:"rendered_pages"`
 	Bytes         int64      `json:"bytes"`
 	Checksum      string     `json:"checksum,omitempty"`

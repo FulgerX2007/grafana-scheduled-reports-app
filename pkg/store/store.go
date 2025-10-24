@@ -166,6 +166,9 @@ func (s *Store) migrate() error {
 		`ALTER TABLE runs ADD COLUMN email_sent INTEGER NOT NULL DEFAULT 0`,
 		// Migration: Add email_error field to store email sending errors
 		`ALTER TABLE runs ADD COLUMN email_error TEXT`,
+		// Migration: Add artifact_data BLOB field to store PDF content directly in database
+		// This replaces filesystem storage to comply with Grafana catalog requirements
+		`ALTER TABLE runs ADD COLUMN artifact_data BLOB`,
 	}
 
 	for _, migration := range migrations {
@@ -395,10 +398,10 @@ func (s *Store) UpdateRun(run *model.Run) error {
 func (s *Store) updateRunDirect(run *model.Run) error {
 	_, err := s.db.Exec(`
 		UPDATE runs SET
-			finished_at = ?, status = ?, error_text = ?, artifact_path = ?,
+			finished_at = ?, status = ?, error_text = ?, artifact_path = ?, artifact_data = ?,
 			rendered_pages = ?, bytes = ?, checksum = ?, email_sent = ?, email_error = ?
 		WHERE id = ?`,
-		run.FinishedAt, run.Status, run.ErrorText, run.ArtifactPath,
+		run.FinishedAt, run.Status, run.ErrorText, run.ArtifactPath, run.ArtifactData,
 		run.RenderedPages, run.Bytes, run.Checksum, run.EmailSent, run.EmailError, run.ID,
 	)
 	return err
@@ -409,15 +412,16 @@ func (s *Store) GetRun(orgID, id int64) (*model.Run, error) {
 	run := &model.Run{}
 	var finishedAt sql.NullTime
 	var errorText, artifactPath, checksum, emailError sql.NullString
+	var artifactData []byte
 
 	err := s.db.QueryRow(`
 		SELECT id, schedule_id, org_id, started_at, finished_at, status, error_text,
-		       artifact_path, rendered_pages, bytes, checksum, email_sent, email_error, created_at
+		       artifact_path, artifact_data, rendered_pages, bytes, checksum, email_sent, email_error, created_at
 		FROM runs WHERE id = ? AND org_id = ?`,
 		id, orgID,
 	).Scan(
 		&run.ID, &run.ScheduleID, &run.OrgID, &run.StartedAt, &finishedAt,
-		&run.Status, &errorText, &artifactPath, &run.RenderedPages,
+		&run.Status, &errorText, &artifactPath, &artifactData, &run.RenderedPages,
 		&run.Bytes, &checksum, &run.EmailSent, &emailError, &run.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -436,6 +440,9 @@ func (s *Store) GetRun(orgID, id int64) (*model.Run, error) {
 	}
 	if artifactPath.Valid {
 		run.ArtifactPath = artifactPath.String
+	}
+	if len(artifactData) > 0 {
+		run.ArtifactData = artifactData
 	}
 	if checksum.Valid {
 		run.Checksum = checksum.String

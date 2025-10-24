@@ -129,8 +129,5 @@
         "scope": "annotations:*"
       }
     ]
-  },
-  "rootUrls": [
-    "*"
-  ]
+  }
 }

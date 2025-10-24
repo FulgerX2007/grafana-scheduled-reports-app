@@ -265,45 +265,55 @@ func (h *Handler) handleRun(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if run.ArtifactPath == "" {
-			http.Error(w, "Artifact not found", http.StatusNotFound)
+		// Check if artifact is stored in database (new method)
+		if len(run.ArtifactData) > 0 {
+			// Get schedule to retrieve the name for filename
+			schedule, err := h.store.GetSchedule(orgID, run.ScheduleID)
+			if err != nil {
+				http.Error(w, "Schedule not found", http.StatusNotFound)
+				return
+			}
+
+			// Generate filename from schedule name and timestamp
+			timestamp := run.StartedAt.Format("2006-01-02-150405")
+			filename := fmt.Sprintf("%s-%s.pdf", strings.ReplaceAll(schedule.Name, " ", "_"), timestamp)
+
+			w.Header().Set("Content-Type", "application/pdf")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(run.ArtifactData)))
+			w.Write(run.ArtifactData)
+			log.Printf("Served artifact from database: schedule_id=%d, run_id=%d, size=%d bytes", run.ScheduleID, run.ID, len(run.ArtifactData))
 			return
 		}
 
-		// Get schedule to retrieve the name
-		_, err = h.store.GetSchedule(orgID, run.ScheduleID)
-		if err != nil {
-			http.Error(w, "Schedule not found", http.StatusNotFound)
+		// Fallback: legacy filesystem-based artifact (for backward compatibility)
+		if run.ArtifactPath != "" {
+			log.Printf("DEPRECATED: Serving artifact from filesystem (path=%s). Please migrate to database storage.", run.ArtifactPath)
+			file, err := os.Open(run.ArtifactPath)
+			if err != nil {
+				http.Error(w, "Failed to open artifact", http.StatusInternalServerError)
+				return
+			}
+			defer file.Close()
+
+			// Set content type based on file extension
+			contentType := "application/pdf"
+			if len(run.ArtifactPath) >= 4 && run.ArtifactPath[len(run.ArtifactPath)-4:] == ".png" {
+				contentType = "image/png"
+			}
+
+			// Extract filename from path
+			filename := filepath.Base(run.ArtifactPath)
+			filename = strings.ReplaceAll(filename, " ", "_")
+
+			w.Header().Set("Content-Type", contentType)
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+			io.Copy(w, file)
 			return
 		}
 
-		file, err := os.Open(run.ArtifactPath)
-		if err != nil {
-			http.Error(w, "Failed to open artifact", http.StatusInternalServerError)
-			return
-		}
-		defer file.Close()
-
-		// Set content type based on file extension
-		contentType := "application/pdf"
-		if len(run.ArtifactPath) >= 4 && run.ArtifactPath[len(run.ArtifactPath)-4:] == ".png" {
-			contentType = "image/png"
-		}
-
-		// Extract just the filename from the full path
-		// The artifact path looks like: /var/lib/grafana/plugin-data/artifacts/org_1/test 2-2025-10-06-173548.pdf
-		// We want: test_2-2025-10-06-173548.pdf
-		filename := filepath.Base(run.ArtifactPath)
-		log.Printf("Original artifact path: %s", run.ArtifactPath)
-		log.Printf("Extracted filename: %s", filename)
-
-		// Replace all spaces with underscores
-		filename = strings.ReplaceAll(filename, " ", "_")
-		log.Printf("Final filename: %s", filename)
-
-		w.Header().Set("Content-Type", contentType)
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-		io.Copy(w, file)
+		// No artifact found
+		http.Error(w, "Artifact not found", http.StatusNotFound)
 		return
 	}
 

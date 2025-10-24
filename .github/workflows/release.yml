@@ -73,20 +73,20 @@ jobs:
           ls -lh dist/gpx_reporting_linux_amd64
           file dist/gpx_reporting_linux_amd64
 
-          # Create platform-specific package directory
-          mkdir -p ci/packages/scheduled-reports-app
+          # Create platform-specific package directory with plugin ID as folder name
+          mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
           # Copy only the files we need (excluding platform-specific binaries)
-          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/scheduled-reports-app/
-          rsync -av dist/gpx_reporting_linux_amd64 ci/packages/scheduled-reports-app/gpx_reporting_linux_amd64
+          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
+          rsync -av dist/gpx_reporting_linux_amd64 ci/packages/fulgerx2007-scheduled-reports-app/gpx_reporting_linux_amd64
 
           # Verify package contents
           echo "=== Package contents ==="
-          ls -lh ci/packages/scheduled-reports-app/ | grep gpx || echo "No gpx_reporting found!"
+          ls -lh ci/packages/fulgerx2007-scheduled-reports-app/ | grep gpx || echo "No gpx_reporting found!"
 
           # Create archive
           cd ci/packages
-          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.linux-amd64.zip scheduled-reports-app
+          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.linux-amd64.zip fulgerx2007-scheduled-reports-app
 
           # Clean up for next platform
           cd ../..
@@ -98,15 +98,15 @@ jobs:
           cp dist/gpx_reporting_linux_arm64 dist/gpx_reporting
           chmod +x dist/gpx_reporting
 
-          # Create platform-specific package directory
-          mkdir -p ci/packages/scheduled-reports-app
+          # Create platform-specific package directory with plugin ID as folder name
+          mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
           # Copy only the files we need (excluding platform-specific binaries)
-          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/scheduled-reports-app/
+          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
-          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.linux-arm64.zip scheduled-reports-app
+          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.linux-arm64.zip fulgerx2007-scheduled-reports-app
 
           # Clean up for next platform
           cd ../..
@@ -119,15 +119,15 @@ jobs:
           cp dist/gpx_reporting_darwin_amd64 dist/gpx_reporting
           chmod +x dist/gpx_reporting
 
-          # Create platform-specific package directory
-          mkdir -p ci/packages/scheduled-reports-app
+          # Create platform-specific package directory with plugin ID as folder name
+          mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
           # Copy only the files we need (excluding platform-specific binaries)
-          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/scheduled-reports-app/
+          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
-          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.darwin-amd64.zip scheduled-reports-app
+          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.darwin-amd64.zip fulgerx2007-scheduled-reports-app
 
           # Clean up for next platform
           cd ../..
@@ -140,15 +140,15 @@ jobs:
           cp dist/gpx_reporting_darwin_arm64 dist/gpx_reporting
           chmod +x dist/gpx_reporting
 
-          # Create platform-specific package directory
-          mkdir -p ci/packages/scheduled-reports-app
+          # Create platform-specific package directory with plugin ID as folder name
+          mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
           # Copy only the files we need (excluding platform-specific binaries)
-          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/scheduled-reports-app/
+          rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
-          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.darwin-arm64.zip scheduled-reports-app
+          zip -r ../../scheduled-reports-app-${{ steps.version.outputs.version }}.darwin-arm64.zip fulgerx2007-scheduled-reports-app
 
           # Clean up
           cd ../..
@@ -156,7 +156,7 @@ jobs:
 
       - name: Generate checksums
         run: |
-          sha256sum scheduled-reports-app-*.zip > checksums.txt
+          md5sum scheduled-reports-app-*.zip > checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -197,7 +197,7 @@ jobs:
             - ✅ Service account authentication (Grafana 11.6+)
 
             ### Checksums
-            See `checksums.txt` for SHA256 checksums of all archives.
+            See `checksums.txt` for MD5 checksums of all archives.
           files: |
             scheduled-reports-app-*.zip
             checksums.txt
