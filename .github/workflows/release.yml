@@ -64,6 +64,25 @@ jobs:
           CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o ../../dist/gpx_reporting_darwin_arm64
           chmod +x ../../dist/gpx_reporting_darwin_arm64
 
+      - name: Sign plugin
+        run: |
+          echo "Signing plugin with Grafana signing tool..."
+          export GRAFANA_ACCESS_POLICY_TOKEN="${{ secrets.PLUGIN_SIGNING }}"
+          npx --yes @grafana/sign-plugin@latest
+        env:
+          GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.PLUGIN_SIGNING }}
+
+      - name: Verify plugin signature
+        run: |
+          if [ -f "dist/MANIFEST.txt" ]; then
+            echo "✅ Plugin signed successfully"
+            echo "=== MANIFEST.txt contents ==="
+            cat dist/MANIFEST.txt
+          else
+            echo "❌ ERROR: Plugin signing failed - MANIFEST.txt not found"
+            exit 1
+          fi
+
       - name: Package plugin for Linux (amd64)
         run: |
           # Copy the platform-specific backend binary to dist
@@ -178,20 +197,23 @@ jobs:
             unzip scheduled-reports-app-${{ steps.version.outputs.version }}.<platform>.zip -d /var/lib/grafana/plugins/
             ```
 
-            **2. Configure Grafana to allow unsigned plugins:**
-
-            Add to your Grafana configuration file (`grafana.ini` or `custom.ini`):
-            ```ini
-            [plugins]
-            allow_loading_unsigned_plugins = scheduled-reports-app
-            ```
-
-            Or set the environment variable:
+            **2. Restart Grafana to load the plugin:**
             ```bash
-            GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=scheduled-reports-app
+            systemctl restart grafana-server
             ```
 
-            **3. Restart Grafana to load the plugin.**
+            **3. Enable the plugin:**
+            - Navigate to **Administration → Plugins** in Grafana
+            - Find **"Scheduled Reports"** and click **Enable**
+            - Go to **Apps → Scheduled Reports** to start using the plugin
+
+            ### Features
+            - ✅ Flexible scheduling (daily, weekly, monthly, custom cron)
+            - ✅ High-fidelity Chromium-based PDF rendering
+            - ✅ Email delivery with SMTP support
+            - ✅ Complete audit trail and run history
+            - ✅ Multi-tenancy with per-organization settings
+            - ✅ Service account authentication (Grafana 11.6+)
 
             ### Checksums
             See `checksums.txt` for SHA256 checksums of all archives.
