@@ -284,31 +284,22 @@ func (s *Scheduler) executeScheduleOnce(schedule *model.Schedule, run *model.Run
 	checksum := fmt.Sprintf("%x", sha256.Sum256(reportData))
 	run.Checksum = checksum
 
-	// Save artifact
-	artifactPath := filepath.Join(s.artifactsPath, fmt.Sprintf("org_%d", schedule.OrgID), filename)
-	if err := os.MkdirAll(filepath.Dir(artifactPath), 0755); err != nil {
-		return fmt.Errorf("failed to create artifacts directory: %w", err)
-	}
+	// Save artifact directly to database as BLOB
+	run.ArtifactData = reportData
+	log.Printf("Report saved to database (%d bytes, checksum=%s)", len(reportData), checksum)
 
-	if err := os.WriteFile(artifactPath, reportData, 0644); err != nil {
-		return fmt.Errorf("failed to save artifact: %w", err)
-	}
-
-	run.ArtifactPath = artifactPath
-	log.Printf("Report saved to %s (%d bytes)", artifactPath, len(reportData))
-
-	// Update run record with artifact info BEFORE sending email
+	// Update run record with artifact data BEFORE sending email
 	// This makes the download button available immediately in the UI
 	if err := s.store.UpdateRun(run); err != nil {
-		log.Printf("WARNING: Failed to update run record with artifact path: %v", err)
+		log.Printf("WARNING: Failed to update run record with artifact data: %v", err)
 		// Continue anyway - we'll try to update again after email attempt
 	} else {
-		log.Printf("Run record updated with artifact path (download now available in UI)")
+		log.Printf("Run record updated with artifact data (download now available in UI)")
 	}
 
-	// Send email (optional - report is already saved to disk)
+	// Send email (optional - report is already saved to database)
 	if settings.SMTPConfig == nil {
-		log.Printf("SMTP not configured for org %d - report saved to %s (available for download)", schedule.OrgID, artifactPath)
+		log.Printf("SMTP not configured for org %d - report saved to database (available for download)", schedule.OrgID)
 		run.EmailSent = false
 		run.EmailError = "SMTP not configured"
 		// Update run with email status

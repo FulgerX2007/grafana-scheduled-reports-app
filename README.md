@@ -380,14 +380,14 @@ curl -X POST "http://localhost:3000/api/plugins/scheduled-reports-app/resources/
 
 ## 📚 Documentation
 
-- **[QUICKSTART.md](./QUICKSTART.md)** - 5-minute setup guide
-- **[SETUP_GUIDE.md](./SETUP_GUIDE.md)** - Detailed installation and configuration
-- **[AUTHENTICATION.md](./AUTHENTICATION.md)** - Service account setup and troubleshooting
-- **[E2E_TESTING.md](./E2E_TESTING.md)** - Playwright end-to-end testing guide
-- **[BUILD.md](./BUILD.md)** - Building and packaging instructions
-- **[SECURITY.md](./SECURITY.md)** - Security considerations and best practices
-- **[CLAUDE.md](./CLAUDE.md)** - Developer guidance (for Claude Code)
-- **[GRAFANA_CATALOG_SUBMISSION.md](./GRAFANA_CATALOG_SUBMISSION.md)** - Publishing to Grafana catalog
+- **[QUICKSTART.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/QUICKSTART.md)** - 5-minute setup guide
+- **[SETUP_GUIDE.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/SETUP_GUIDE.md)** - Detailed installation and configuration
+- **[AUTHENTICATION.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/AUTHENTICATION.md)** - Service account setup and troubleshooting
+- **[E2E_TESTING.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/E2E_TESTING.md)** - Playwright end-to-end testing guide
+- **[BUILD.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/BUILD.md)** - Building and packaging instructions
+- **[SECURITY.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/SECURITY.md)** - Security considerations and best practices
+- **[CLAUDE.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/CLAUDE.md)** - Developer guidance (for Claude Code)
+- **[GRAFANA_CATALOG_SUBMISSION.md](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/GRAFANA_CATALOG_SUBMISSION.md)** - Publishing to Grafana catalog
 
 ## 🤝 Contributing
 
@@ -401,7 +401,7 @@ Contributions are welcome! Please:
 
 ## 📝 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](https://github.com/FulgerX2007/grafana-scheduled-reports-app/blob/master/LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -414,7 +414,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 - **Issues**: [GitHub Issues](https://github.com/FulgerX2007/grafana-scheduled-reports-app/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/FulgerX2007/grafana-scheduled-reports-app/discussions)
-- **Documentation**: [Built-in docs](http://localhost:3000/a/scheduled-reports-app/documentation) (Apps → Scheduled Reports → Documentation)
+- **Documentation**: Built-in docs available at Apps → Scheduled Reports → Documentation in your Grafana instance
 
 ---
 
