@@ -67,10 +67,10 @@ jobs:
       - name: Sign plugin
         run: |
           echo "Signing plugin with Grafana signing tool..."
-          export GRAFANA_ACCESS_POLICY_TOKEN="${{ secrets.PLUGIN_SIGNING }}"
+          export GRAFANA_ACCESS_POLICY_TOKEN="${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}"
           npx --yes @grafana/sign-plugin@latest
         env:
-          GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.PLUGIN_SIGNING }}
+          GRAFANA_ACCESS_POLICY_TOKEN: ${{ secrets.GRAFANA_ACCESS_POLICY_TOKEN }}
 
       - name: Verify plugin signature
         run: |
