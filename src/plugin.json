@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
   "name": "Scheduled Reports",
-  "id": "sheduled-reports-app",
+  "id": "scheduled-reports-app",
   "info": {
     "description": "Automated dashboard reporting with Chromium-based PDF generation, email delivery, and flexible scheduling (daily, weekly, monthly, or custom cron expressions)",
     "author": {
@@ -28,7 +28,7 @@
     {
       "type": "page",
       "name": "Scheduled Reports",
-      "path": "/a/sheduled-reports-app",
+      "path": "/a/scheduled-reports-app",
       "role": "Editor",
       "addToNav": true,
       "defaultNav": true
@@ -36,35 +36,35 @@
     {
       "type": "page",
       "name": "Create Schedule",
-      "path": "/a/sheduled-reports-app/schedule/new",
+      "path": "/a/scheduled-reports-app/schedule/new",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Edit Schedule",
-      "path": "/a/sheduled-reports-app/schedule/edit",
+      "path": "/a/scheduled-reports-app/schedule/edit",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Run History",
-      "path": "/a/sheduled-reports-app/history",
+      "path": "/a/scheduled-reports-app/history",
       "role": "Editor",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Documentation",
-      "path": "/a/sheduled-reports-app/documentation",
+      "path": "/a/scheduled-reports-app/documentation",
       "role": "Viewer",
       "addToNav": false
     },
     {
       "type": "page",
       "name": "Settings",
-      "path": "/a/sheduled-reports-app/settings",
+      "path": "/a/scheduled-reports-app/settings",
       "role": "Admin",
       "addToNav": false
     }

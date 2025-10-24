@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/yourusername/sheduled-reports-app/pkg/api"
-	"github.com/yourusername/sheduled-reports-app/pkg/cron"
-	"github.com/yourusername/sheduled-reports-app/pkg/store"
+	"github.com/yourusername/scheduled-reports-app/pkg/api"
+	"github.com/yourusername/scheduled-reports-app/pkg/cron"
+	"github.com/yourusername/scheduled-reports-app/pkg/store"
 )
 
 func main() {

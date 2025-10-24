@@ -23,8 +23,14 @@ Scheduled Reports is a comprehensive Grafana app plugin that brings enterprise-g
 - **Manual Execution**: Trigger any report on-demand
 
 ### 📊 High-Fidelity Rendering
-- **Chromium-Based**: Uses go-rod for pixel-perfect dashboard rendering
-- **Direct PDF Generation**: Chrome DevTools Protocol for native PDF output
+- **Enhanced Chromium Backend** (Default & Recommended):
+  - Best compatibility with Docker/Alpine Linux environments
+  - Progressive scrolling to trigger all lazy-loaded panels
+  - Automatic waiting for network idle and loading indicators
+  - Full content capture with dynamic dimension calculation
+  - Per-organization browser reuse for optimal performance
+- **Experimental Playwright Backend**: Available for Ubuntu/Debian (requires Node.js driver)
+- **Direct PDF Generation**: Native PDF output with configurable dimensions
 - **Full JavaScript Support**: Handles complex dashboards with animations and dynamic content
 - **Configurable Quality**: Adjust viewport size, scale factor, and rendering delays
 - **Per-Org Browser Reuse**: Efficient resource management with lazy initialization
@@ -58,7 +64,7 @@ Scheduled Reports is a comprehensive Grafana app plugin that brings enterprise-g
 
 - **Grafana**: Version 11.6.0 or higher (11.6+ recommended for managed service accounts)
 - **Chromium/Chrome**: Required for PDF rendering
-  - System package: `chromium-browser` or `google-chrome`
+  - System package: `chromium-browser` or `google-chrome` (recommended for Docker/Alpine)
   - Standalone binary: Chrome for Testing (auto-downloaded in Docker)
   - Auto-detected from common paths if not configured
 - **SMTP Server**: For email delivery (Gmail, SendGrid, etc.)
@@ -280,7 +286,7 @@ See E2E_TESTING.md for Playwright setup
 
 ## 🔌 API Reference
 
-Base path: `/api/plugins/sheduled-reports-app/resources/api`
+Base path: `/api/plugins/scheduled-reports-app/resources/api`
 
 ### Schedules
 
@@ -315,7 +321,7 @@ Base path: `/api/plugins/sheduled-reports-app/resources/api`
 ### Example: Create Schedule
 
 ```bash
-curl -X POST "http://localhost:3000/api/plugins/sheduled-reports-app/resources/api/schedules" \
+curl -X POST "http://localhost:3000/api/plugins/scheduled-reports-app/resources/api/schedules" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -408,7 +414,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 - **Issues**: [GitHub Issues](https://github.com/FulgerX2007/grafana-scheduled-reports-app/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/FulgerX2007/grafana-scheduled-reports-app/discussions)
-- **Documentation**: [Built-in docs](http://localhost:3000/a/sheduled-reports-app/documentation) (Apps → Scheduled Reports → Documentation)
+- **Documentation**: [Built-in docs](http://localhost:3000/a/scheduled-reports-app/documentation) (Apps → Scheduled Reports → Documentation)
 
 ---
 

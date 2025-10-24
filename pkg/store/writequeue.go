@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 // writeOpType defines the type of write operation

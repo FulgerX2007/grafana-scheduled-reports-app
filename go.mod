@@ -1,9 +1,10 @@
-module github.com/yourusername/sheduled-reports-app
+module github.com/yourusername/scheduled-reports-app
 
 go 1.24.6
 
 require (
 	github.com/go-rod/rod v0.116.2
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/grafana/grafana-plugin-sdk-go v0.280.0
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/robfig/cron/v3 v3.0.1
@@ -29,7 +30,6 @@ require (
 	github.com/google/flatbuffers v25.9.23+incompatible // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75 // indirect
 	github.com/grafana/otel-profiling-go v0.5.1 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0 // indirect

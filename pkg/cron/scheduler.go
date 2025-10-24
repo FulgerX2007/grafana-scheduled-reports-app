@@ -12,10 +12,10 @@ import (
 
 	"github.com/gorhill/cronexpr"
 	"github.com/robfig/cron/v3"
-	"github.com/yourusername/sheduled-reports-app/pkg/mail"
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
-	"github.com/yourusername/sheduled-reports-app/pkg/render"
-	"github.com/yourusername/sheduled-reports-app/pkg/store"
+	"github.com/yourusername/scheduled-reports-app/pkg/mail"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/render"
+	"github.com/yourusername/scheduled-reports-app/pkg/store"
 )
 
 // Scheduler handles report scheduling
@@ -255,11 +255,11 @@ func (s *Scheduler) executeScheduleOnce(schedule *model.Schedule, run *model.Run
 	// Get or create renderer for this org (reuse renderer instance)
 	renderer, exists := s.renderers[schedule.OrgID]
 	if !exists {
-		// Create new Chromium renderer
+		// Create new renderer
 		var err error
-		renderer, err = render.NewBackend(render.BackendChromium, grafanaURL, settings.RendererConfig)
+		renderer, err = render.NewBackend(grafanaURL, settings.RendererConfig)
 		if err != nil {
-			return fmt.Errorf("failed to create Chromium renderer: %w", err)
+			return fmt.Errorf("failed to create renderer: %w", err)
 		}
 		s.renderers[schedule.OrgID] = renderer
 		log.Printf("Created new Chromium renderer for org %d with URL %s", schedule.OrgID, grafanaURL)
@@ -403,4 +403,26 @@ func (s *Scheduler) calculateNextRun(schedule *model.Schedule) time.Time {
 	// Convert to UTC for storage (SQLite stores timestamps in UTC)
 	// Strip monotonic clock reading by truncating to second precision
 	return nextRun.UTC().Truncate(time.Second)
+}
+
+// ClearRendererCache closes and removes renderer instances for the given org ID
+// This forces new renderers to be created with updated settings on next render
+func (s *Scheduler) ClearRendererCache(orgID int64) error {
+	s.cacheMutex.Lock()
+	defer s.cacheMutex.Unlock()
+
+	// Close existing renderer if it exists
+	if renderer, exists := s.renderers[orgID]; exists {
+		if err := renderer.Close(); err != nil {
+			log.Printf("Warning: Failed to close renderer for org %d: %v", orgID, err)
+		}
+		delete(s.renderers, orgID)
+		log.Printf("Cleared renderer cache for org %d", orgID)
+	}
+
+	// Also clear settings cache to force reload
+	delete(s.settingsCache, orgID)
+	log.Printf("Cleared settings cache for org %d", orgID)
+
+	return nil
 }

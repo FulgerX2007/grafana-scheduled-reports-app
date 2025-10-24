@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 )
 
 func TestNewRenderer(t *testing.T) {

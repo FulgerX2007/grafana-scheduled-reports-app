@@ -17,9 +17,9 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
-	"github.com/yourusername/sheduled-reports-app/pkg/cron"
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
-	"github.com/yourusername/sheduled-reports-app/pkg/store"
+	"github.com/yourusername/scheduled-reports-app/pkg/cron"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/store"
 	"gopkg.in/gomail.v2"
 )
 
@@ -381,6 +381,11 @@ func (h *Handler) handleSettings(w http.ResponseWriter, r *http.Request) {
 		if err := h.store.UpsertSettings(&settings); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
+		}
+
+		// Clear renderer cache to force recreation with new settings
+		if err := h.scheduler.ClearRendererCache(orgID); err != nil {
+			log.Printf("Warning: Failed to clear renderer cache for org %d: %v", orgID, err)
 		}
 
 		respondJSON(w, settings)

@@ -61,7 +61,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
 
   const loadSettings = async () => {
     try {
-      const response = await getBackendSrv().get('/api/plugins/sheduled-reports-app/resources/api/settings');
+      const response = await getBackendSrv().get('/api/plugins/scheduled-reports-app/resources/api/settings');
       if (response) {
         // Merge loaded settings with defaults to ensure all fields are present
         setSettings({
@@ -78,7 +78,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
 
   const loadServiceAccountStatus = async () => {
     try {
-      const response = await getBackendSrv().get('/api/plugins/sheduled-reports-app/resources/api/service-account/status');
+      const response = await getBackendSrv().get('/api/plugins/scheduled-reports-app/resources/api/service-account/status');
       setServiceAccountStatus(response);
     } catch (error) {
       console.error('Failed to load service account status:', error);
@@ -93,7 +93,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
   const handleSubmit = async () => {
     const appEvents = getAppEvents();
     try {
-      await getBackendSrv().post('/api/plugins/sheduled-reports-app/resources/api/settings', settings);
+      await getBackendSrv().post('/api/plugins/scheduled-reports-app/resources/api/settings', settings);
       appEvents.publish({
         type: AppEvents.alertSuccess.name,
         payload: ['Settings saved successfully'],
@@ -147,7 +147,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
 
     try {
       const response = await getBackendSrv().post(
-        '/api/plugins/sheduled-reports-app/resources/api/chromium/check-version',
+        '/api/plugins/scheduled-reports-app/resources/api/chromium/check-version',
         { chromium_path: settings.renderer_config?.chromium_path || '' }
       );
 
@@ -186,7 +186,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onNavigate }) => {
 
     try {
       const response = await getBackendSrv().post(
-        '/api/plugins/sheduled-reports-app/resources/api/smtp/test',
+        '/api/plugins/scheduled-reports-app/resources/api/smtp/test',
         settings.smtp_config
       );
 

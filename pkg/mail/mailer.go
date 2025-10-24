@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/yourusername/sheduled-reports-app/pkg/model"
+	"github.com/yourusername/scheduled-reports-app/pkg/model"
 	"gopkg.in/gomail.v2"
 )
 

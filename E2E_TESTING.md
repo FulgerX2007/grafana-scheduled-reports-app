@@ -161,7 +161,7 @@ import { test, expect } from '../fixtures/auth';
 test.describe('Feature Name', () => {
   test.beforeEach(async ({ authenticatedPage: page }) => {
     // Setup code runs before each test
-    await page.goto('/a/sheduled-reports-app');
+    await page.goto('/a/scheduled-reports-app');
   });
 
   test('should do something', async ({ authenticatedPage: page }) => {
