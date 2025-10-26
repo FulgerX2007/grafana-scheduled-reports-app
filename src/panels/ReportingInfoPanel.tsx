@@ -37,7 +37,7 @@ export const ReportingInfoPanel: React.FC<PanelProps> = ({ width, height }) => {
   const loadSchedules = async (uid: string) => {
     try {
       const response = await getBackendSrv().get(
-        `/api/plugins/scheduledreports-app/resources/api/dashboards/${uid}/schedules`
+        `/api/plugins/fulgerx2007-scheduledreports-app/resources/api/dashboards/${uid}/schedules`
       );
       const scheduleList = response.schedules || [];
       setSchedules(scheduleList);
@@ -50,7 +50,7 @@ export const ReportingInfoPanel: React.FC<PanelProps> = ({ width, height }) => {
   };
 
   const handleManageReports = () => {
-    locationService.push('/a/scheduledreports-app');
+    locationService.push('/a/fulgerx2007-scheduledreports-app');
   };
 
   if (loading) {

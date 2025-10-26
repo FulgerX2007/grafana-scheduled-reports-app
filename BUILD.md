@@ -87,13 +87,13 @@ Copy the `dist/` folder to Grafana plugins directory:
 
 ```bash
 # For Linux
-sudo cp -r dist /var/lib/grafana/plugins/scheduled-reports-app
+sudo cp -r dist /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
 
 # For macOS with Homebrew
-cp -r dist /usr/local/var/lib/grafana/plugins/scheduled-reports-app
+cp -r dist /usr/local/var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
 
 # For Docker
-docker cp dist <container>:/var/lib/grafana/plugins/scheduled-reports-app
+docker cp dist <container>:/var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
 ```
 
 ### Production Installation
@@ -102,15 +102,15 @@ Use the distribution archive:
 
 ```bash
 # Extract to plugins directory
-sudo unzip scheduled-reports-app-*.zip -d /var/lib/grafana/plugins/scheduled-reports-app/
+sudo unzip scheduled-reports-app-*.zip -d /var/lib/grafana/plugins/
 
 # Set ownership (Linux)
-sudo chown -R grafana:grafana /var/lib/grafana/plugins/scheduled-reports-app
+sudo chown -R grafana:grafana /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
 
 # Configure Grafana to allow unsigned plugin
 # Edit /etc/grafana/grafana.ini:
 [plugins]
-allow_loading_unsigned_plugins = scheduled-reports-app
+allow_loading_unsigned_plugins = fulgerx2007-scheduledreports-app
 
 # Restart Grafana
 sudo systemctl restart grafana-server
@@ -192,7 +192,7 @@ sudo journalctl -u grafana-server -f
 
 3. Check file permissions:
 ```bash
-ls -la /var/lib/grafana/plugins/scheduled-reports-app/
+ls -la /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app/
 ```
 
 ### Rendering fails after installation
@@ -248,4 +248,4 @@ npm test
 ## Support
 
 - Documentation: [README.md](./README.md)
-- Issues: https://github.com/yourusername/scheduled-reports-app/issues
+- Issues: https://github.com/FulgerX2007/grafana-scheduled-reports-app/issues

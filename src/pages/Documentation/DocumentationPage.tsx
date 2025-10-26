@@ -9,7 +9,7 @@ export const DocumentationPage: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <img src="public/plugins/scheduledreports-app/img/logo.png" alt="Scheduled Reports" className={styles.logo} />
+        <img src="public/plugins/fulgerx2007-scheduledreports-app/img/logo.png" alt="Scheduled Reports" className={styles.logo} />
         <h1>Scheduled Reports Documentation</h1>
       </div>
 
@@ -392,7 +392,7 @@ export const DocumentationPage: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <p>Base path: <code>/api/plugins/scheduledreports-app/resources/api</code></p>
+        <p>Base path: <code>/api/plugins/fulgerx2007-scheduledreports-app/resources/api</code></p>
 
         <h3>Security</h3>
         <ul>

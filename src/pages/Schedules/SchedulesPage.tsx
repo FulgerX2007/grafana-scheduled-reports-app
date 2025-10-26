@@ -23,7 +23,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
 
   const loadSchedules = async () => {
     try {
-      const response = await getBackendSrv().get('/api/plugins/scheduledreports-app/resources/api/schedules');
+      const response = await getBackendSrv().get('/api/plugins/fulgerx2007-scheduledreports-app/resources/api/schedules');
       console.log('API Response:', response);
 
       let schedulesData: Schedule[] = [];
@@ -65,7 +65,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
         // Fetch latest run
         try {
           const runsResponse = await getBackendSrv().get(
-            `/api/plugins/scheduledreports-app/resources/api/schedules/${schedule.id}/runs`
+            `/api/plugins/fulgerx2007-scheduledreports-app/resources/api/schedules/${schedule.id}/runs`
           );
           const scheduleRuns = runsResponse.runs || [];
           if (scheduleRuns.length > 0) {
@@ -97,7 +97,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
       return;
     }
     try {
-      await getBackendSrv().delete(`/api/plugins/scheduledreports-app/resources/api/schedules/${id}`);
+      await getBackendSrv().delete(`/api/plugins/fulgerx2007-scheduledreports-app/resources/api/schedules/${id}`);
       loadSchedules();
     } catch (error) {
       console.error('Failed to delete schedule:', error);
@@ -107,7 +107,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
   const handleRunNow = async (id: number) => {
     const appEvents = getAppEvents();
     try {
-      await getBackendSrv().post(`/api/plugins/scheduledreports-app/resources/api/schedules/${id}/run`);
+      await getBackendSrv().post(`/api/plugins/fulgerx2007-scheduledreports-app/resources/api/schedules/${id}/run`);
       appEvents.publish({
         type: AppEvents.alertSuccess.name,
         payload: ['Report generation started'],
@@ -123,7 +123,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
 
   const handleToggle = async (schedule: Schedule) => {
     try {
-      await getBackendSrv().put(`/api/plugins/scheduledreports-app/resources/api/schedules/${schedule.id}`, {
+      await getBackendSrv().put(`/api/plugins/fulgerx2007-scheduledreports-app/resources/api/schedules/${schedule.id}`, {
         ...schedule,
         enabled: !schedule.enabled,
       });
@@ -135,7 +135,7 @@ export const SchedulesPage: React.FC<SchedulesPageProps> = ({ onNavigate }) => {
 
   const downloadArtifact = (runId: number) => {
     const appSubUrl = config.appSubUrl || '';
-    window.open(`${appSubUrl}/api/plugins/scheduledreports-app/resources/api/runs/${runId}/artifact`, '_blank');
+    window.open(`${appSubUrl}/api/plugins/fulgerx2007-scheduledreports-app/resources/api/runs/${runId}/artifact`, '_blank');
   };
 
   if (loading) {

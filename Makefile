@@ -78,12 +78,12 @@ install-plugin:
 		echo "Error: Plugin not built. Run 'make build' first."; \
 		exit 1; \
 	fi
-	@sudo mkdir -p /var/lib/grafana/plugins/scheduled-reports-app
-	@sudo rm -rf /var/lib/grafana/plugins/scheduled-reports-app/*
-	@sudo cp -r dist/* /var/lib/grafana/plugins/scheduled-reports-app/
-	@sudo chown -R grafana:grafana /var/lib/grafana/plugins/scheduled-reports-app
-	@echo "✓ Plugin installed to /var/lib/grafana/plugins/scheduled-reports-app"
+	@sudo mkdir -p /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
+	@sudo rm -rf /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app/*
+	@sudo cp -r dist/* /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app/
+	@sudo chown -R grafana:grafana /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app
+	@echo "✓ Plugin installed to /var/lib/grafana/plugins/fulgerx2007-scheduledreports-app"
 	@echo ""
 	@echo "Next steps:"
-	@echo "  1. Add to grafana.ini: allow_loading_unsigned_plugins = scheduled-reports-app"
+	@echo "  1. Add to grafana.ini: allow_loading_unsigned_plugins = fulgerx2007-scheduledreports-app"
 	@echo "  2. Restart Grafana: sudo systemctl restart grafana-server"

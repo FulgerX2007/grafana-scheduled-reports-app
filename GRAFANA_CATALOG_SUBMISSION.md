@@ -144,7 +144,7 @@ Replace all occurrences of old repository URLs:
 
 ```bash
 # Find and replace in README.md:
-# FROM: https://github.com/yourusername/scheduled-reports-app
+# FROM: https://github.com/FulgerX2007/grafana-scheduled-reports-app
 # FROM: https://github.com/FulgerX2007/grafana-scheduled-reports
 # TO:   https://github.com/FulgerX2007/grafana-scheduled-reports-app
 ```

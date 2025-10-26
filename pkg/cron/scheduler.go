@@ -10,10 +10,10 @@ import (
 
     "github.com/gorhill/cronexpr"
     "github.com/robfig/cron/v3"
-    "github.com/yourusername/scheduled-reports-app/pkg/mail"
-    "github.com/yourusername/scheduled-reports-app/pkg/model"
-    "github.com/yourusername/scheduled-reports-app/pkg/render"
-    "github.com/yourusername/scheduled-reports-app/pkg/store"
+    "github.com/FulgerX2007/grafana-scheduled-reports-app/pkg/mail"
+    "github.com/FulgerX2007/grafana-scheduled-reports-app/pkg/model"
+    "github.com/FulgerX2007/grafana-scheduled-reports-app/pkg/render"
+    "github.com/FulgerX2007/grafana-scheduled-reports-app/pkg/store"
 )
 
 // Scheduler handles report scheduling

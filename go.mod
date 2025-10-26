@@ -1,4 +1,4 @@
-module github.com/yourusername/scheduled-reports-app
+module github.com/FulgerX2007/grafana-scheduled-reports-app
 
 go 1.24.6
 

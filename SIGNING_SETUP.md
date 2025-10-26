@@ -60,7 +60,7 @@ When you sign with your own key (`PLUGIN_SIGNING` secret), the plugin gets a **p
 
 ```json
 {
-  "plugin": "scheduled-reports-app",
+  "plugin": "fulgerx2007-scheduledreports-app",
   "version": "1.0.0",
   "files": {
     "plugin.json": "<hash>",
@@ -87,7 +87,7 @@ When Grafana loads the plugin, it:
 For **private signatures**, add to `grafana.ini`:
 
 ```ini
-[plugins.scheduled-reports-app]
+[plugins.fulgerx2007-scheduledreports-app]
 allow_loading_unsigned_plugins = false
 
 # Root URLs where this plugin can run (comma-separated)
@@ -98,7 +98,7 @@ root_url = http://localhost:3000,https://your-grafana.example.com
 Or via environment variables:
 ```bash
 # Not needed if properly signed:
-# GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=scheduled-reports-app
+# GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=fulgerx2007-scheduledreports-app
 ```
 
 ## Obtaining the PLUGIN_SIGNING Secret
