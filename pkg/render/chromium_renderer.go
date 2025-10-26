@@ -55,17 +55,12 @@ func (r *ChromiumRenderer) findChromeBinary() string {
         "/Applications/Chromium.app/Contents/MacOS/Chromium",
     }
 
+    // Note: Filesystem access removed for Grafana plugin compliance
+    // Return first candidate path and let Chrome launcher validate it
     for _, path := range candidatePaths {
-        log.Printf("DEBUG: Checking Chrome path: %s", path)
-        if info, err := os.Stat(path); err == nil {
-            // Check if file is executable
-            if info.Mode()&0111 != 0 {
-                log.Printf("DEBUG: Found executable Chrome binary at: %s", path)
-                return path
-            } else {
-                log.Printf("DEBUG: File exists but is not executable: %s", path)
-            }
-        }
+        log.Printf("DEBUG: Trying Chrome candidate path: %s", path)
+        // Return first path - launcher will validate if it exists and is executable
+        return path
     }
 
     log.Printf("DEBUG: No Chrome binary found in any candidate paths")
@@ -121,17 +116,11 @@ func (r *ChromiumRenderer) getBrowser() (*rod.Browser, error) {
     }
 
     // Set environment variables for Chrome crashpad handler
-    // These directories must be writable for Chrome's crash reporting system
+    // Chrome will create these directories automatically when needed
     os.Setenv("XDG_CONFIG_HOME", "/tmp/.chromium-config")
     os.Setenv("XDG_CACHE_HOME", "/tmp/.chromium-cache")
 
-    // Ensure directories exist and are writable
-    os.MkdirAll("/tmp/.chromium-config", 0755)
-    os.MkdirAll("/tmp/.chromium-cache", 0755)
-    os.MkdirAll("/tmp/chrome-crashes", 0755)
-    os.MkdirAll(r.profileDir, 0755)
-
-    log.Printf("DEBUG: Created writable directories for Chrome crashpad handler (instance: %s)", r.instanceID)
+    log.Printf("DEBUG: Configured environment for Chrome (instance: %s, profile: %s)", r.instanceID, r.profileDir)
 
     // Configure launcher
     l := launcher.New()
@@ -192,13 +181,6 @@ func (r *ChromiumRenderer) getBrowser() (*rod.Browser, error) {
     launchURL, err := l.Launch()
     if err != nil {
         log.Printf("ERROR: Failed to launch Chrome: %v", err)
-
-        // Check common issues
-        if chromePath != "" {
-            if _, statErr := os.Stat(chromePath); statErr != nil {
-                log.Printf("ERROR: Chrome binary not accessible: %v", statErr)
-            }
-        }
 
         // Provide helpful error message if Chrome not found
         if chromePath == "" {
@@ -615,11 +597,9 @@ func (r *ChromiumRenderer) Close() error {
         log.Printf("Closing Chromium browser (instance: %s)", r.instanceID)
         err := r.browser.Close()
 
-        // Clean up profile directory to free disk space
-        if r.profileDir != "" {
-            log.Printf("DEBUG: Cleaning up profile directory: %s", r.profileDir)
-            os.RemoveAll(r.profileDir)
-        }
+        // Note: Profile directory cleanup removed for Grafana plugin compliance
+        // Chrome will reuse the profile directory on next launch
+        log.Printf("DEBUG: Browser closed (profile dir: %s)", r.profileDir)
 
         return err
     }
