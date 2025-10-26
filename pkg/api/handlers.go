@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -265,55 +264,28 @@ func (h *Handler) handleRun(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Check if artifact is stored in database (new method)
-		if len(run.ArtifactData) > 0 {
-			// Get schedule to retrieve the name for filename
-			schedule, err := h.store.GetSchedule(orgID, run.ScheduleID)
-			if err != nil {
-				http.Error(w, "Schedule not found", http.StatusNotFound)
-				return
-			}
-
-			// Generate filename from schedule name and timestamp
-			timestamp := run.StartedAt.Format("2006-01-02-150405")
-			filename := fmt.Sprintf("%s-%s.pdf", strings.ReplaceAll(schedule.Name, " ", "_"), timestamp)
-
-			w.Header().Set("Content-Type", "application/pdf")
-			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-			w.Header().Set("Content-Length", fmt.Sprintf("%d", len(run.ArtifactData)))
-			w.Write(run.ArtifactData)
-			log.Printf("Served artifact from database: schedule_id=%d, run_id=%d, size=%d bytes", run.ScheduleID, run.ID, len(run.ArtifactData))
+		// Serve artifact from database
+		if len(run.ArtifactData) == 0 {
+			http.Error(w, "Artifact not found", http.StatusNotFound)
 			return
 		}
 
-		// Fallback: legacy filesystem-based artifact (for backward compatibility)
-		if run.ArtifactPath != "" {
-			log.Printf("DEPRECATED: Serving artifact from filesystem (path=%s). Please migrate to database storage.", run.ArtifactPath)
-			file, err := os.Open(run.ArtifactPath)
-			if err != nil {
-				http.Error(w, "Failed to open artifact", http.StatusInternalServerError)
-				return
-			}
-			defer file.Close()
-
-			// Set content type based on file extension
-			contentType := "application/pdf"
-			if len(run.ArtifactPath) >= 4 && run.ArtifactPath[len(run.ArtifactPath)-4:] == ".png" {
-				contentType = "image/png"
-			}
-
-			// Extract filename from path
-			filename := filepath.Base(run.ArtifactPath)
-			filename = strings.ReplaceAll(filename, " ", "_")
-
-			w.Header().Set("Content-Type", contentType)
-			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
-			io.Copy(w, file)
+		// Get schedule to retrieve the name for filename
+		schedule, err := h.store.GetSchedule(orgID, run.ScheduleID)
+		if err != nil {
+			http.Error(w, "Schedule not found", http.StatusNotFound)
 			return
 		}
 
-		// No artifact found
-		http.Error(w, "Artifact not found", http.StatusNotFound)
+		// Generate filename from schedule name and timestamp
+		timestamp := run.StartedAt.Format("2006-01-02-150405")
+		filename := fmt.Sprintf("%s-%s.pdf", strings.ReplaceAll(schedule.Name, " ", "_"), timestamp)
+
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+		w.Header().Set("Content-Length", fmt.Sprintf("%d", len(run.ArtifactData)))
+		w.Write(run.ArtifactData)
+		log.Printf("Served artifact from database: schedule_id=%d, run_id=%d, size=%d bytes", run.ScheduleID, run.ID, len(run.ArtifactData))
 		return
 	}
 
