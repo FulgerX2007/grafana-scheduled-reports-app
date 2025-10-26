@@ -51,7 +51,6 @@ func (h *Handler) registerRoutes() {
 	h.mux.HandleFunc("/api/settings", h.handleSettings)
 	h.mux.HandleFunc("/api/service-account/status", h.handleServiceAccountStatus)
 	h.mux.HandleFunc("/api/service-account/test-token", h.handleTestToken)
-	h.mux.HandleFunc("/api/chromium/check-version", h.handleChromiumCheckVersion)
 	h.mux.HandleFunc("/api/smtp/test", h.handleSMTPTest)
 }
 
@@ -556,131 +555,6 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-// handleChromiumCheckVersion handles POST /api/chromium/check-version
-func (h *Handler) handleChromiumCheckVersion(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Parse request body to get chromium path
-	var reqBody struct {
-		ChromiumPath string `json:"chromium_path"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	chromiumPath := reqBody.ChromiumPath
-
-	// If no path provided, try to find it automatically
-	if chromiumPath == "" {
-		chromiumPath = findChromiumBinary()
-		if chromiumPath == "" {
-			respondJSON(w, map[string]interface{}{
-				"success": false,
-				"error":   "No Chromium binary specified and auto-detection failed",
-				"message": "Please specify the path to Chrome/Chromium binary",
-			})
-			return
-		}
-	}
-
-	// Check if file exists and is executable
-	info, err := os.Stat(chromiumPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			respondJSON(w, map[string]interface{}{
-				"success": false,
-				"error":   fmt.Sprintf("Chromium binary not found at path: %s", chromiumPath),
-				"path":    chromiumPath,
-			})
-			return
-		}
-		respondJSON(w, map[string]interface{}{
-			"success": false,
-			"error":   fmt.Sprintf("Error accessing Chromium binary: %v", err),
-			"path":    chromiumPath,
-		})
-		return
-	}
-
-	// Check if file is executable
-	if info.Mode()&0111 == 0 {
-		respondJSON(w, map[string]interface{}{
-			"success": false,
-			"error":   "File exists but is not executable",
-			"path":    chromiumPath,
-			"message": fmt.Sprintf("Run: chmod +x %s", chromiumPath),
-		})
-		return
-	}
-
-	// Execute chromium with --version flag
-	ctx := context.Background()
-	cmd := exec.CommandContext(ctx, chromiumPath, "--version")
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err = cmd.Run()
-	if err != nil {
-		respondJSON(w, map[string]interface{}{
-			"success": false,
-			"error":   fmt.Sprintf("Failed to execute Chromium: %v", err),
-			"stderr":  stderr.String(),
-			"path":    chromiumPath,
-		})
-		return
-	}
-
-	version := strings.TrimSpace(stdout.String())
-
-	respondJSON(w, map[string]interface{}{
-		"success": true,
-		"version": version,
-		"path":    chromiumPath,
-		"message": "Chromium binary is valid and executable",
-	})
-}
-
-// findChromiumBinary tries to locate Chrome binary in common locations
-func findChromiumBinary() string {
-	// List of common Chrome binary paths to check (in order of preference)
-	candidatePaths := []string{
-		// Bundled Chrome (relative to plugin directory)
-		"./chrome-linux64/chrome",
-		"chrome-linux64/chrome",
-		"../chrome-linux64/chrome",
-
-		// Try absolute path relative to plugin installation
-		"/var/lib/grafana/plugins/scheduled-reports-app/chrome-linux64/chrome",
-
-		// System Chrome installations
-		"/usr/bin/google-chrome",
-		"/usr/bin/google-chrome-stable",
-		"/usr/bin/chromium",
-		"/usr/bin/chromium-browser",
-		"/snap/bin/chromium",
-
-		// macOS
-		"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-		"/Applications/Chromium.app/Contents/MacOS/Chromium",
-	}
-
-	for _, path := range candidatePaths {
-		if info, err := os.Stat(path); err == nil {
-			// Check if file is executable
-			if info.Mode()&0111 != 0 {
-				return path
-			}
-		}
-	}
-
-	return ""
 }
 
 // handleSMTPTest handles POST /api/smtp/test
