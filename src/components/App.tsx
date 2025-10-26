@@ -44,7 +44,7 @@ export const App: React.FC<AppRootProps> = (props) => {
   const navigate = (page: Page, scheduleId?: number) => {
     // Navigate to the proper URL for each page
     const appSubUrl = config.appSubUrl || '';
-    const baseUrl = `${appSubUrl}/a/scheduled-reports-app`;
+    const baseUrl = `${appSubUrl}/a/scheduledreports-app`;
     let url = baseUrl;
 
     switch (page) {

@@ -37,19 +37,19 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
       if (scheduleId) {
         // Load runs for specific schedule
         response = await getBackendSrv().get(
-          `/api/plugins/scheduled-reports-app/resources/api/schedules/${scheduleId}/runs`
+          `/api/plugins/scheduledreports-app/resources/api/schedules/${scheduleId}/runs`
         );
         setRuns(response.runs || []);
       } else {
         // Load all runs from all schedules
-        const schedulesResponse = await getBackendSrv().get('/api/plugins/scheduled-reports-app/resources/api/schedules');
+        const schedulesResponse = await getBackendSrv().get('/api/plugins/scheduledreports-app/resources/api/schedules');
         const schedules = schedulesResponse.schedules || schedulesResponse || [];
 
         const allRuns: RunWithSchedule[] = [];
         for (const schedule of schedules) {
           try {
             const runsResponse = await getBackendSrv().get(
-              `/api/plugins/scheduled-reports-app/resources/api/schedules/${schedule.id}/runs`
+              `/api/plugins/scheduledreports-app/resources/api/schedules/${schedule.id}/runs`
             );
             const scheduleRuns = runsResponse.runs || [];
             // Add schedule name to each run
@@ -75,7 +75,7 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
 
   const downloadArtifact = async (runId: number) => {
     const appSubUrl = config.appSubUrl || '';
-    window.open(`${appSubUrl}/api/plugins/scheduled-reports-app/resources/api/runs/${runId}/artifact`, '_blank');
+    window.open(`${appSubUrl}/api/plugins/scheduledreports-app/resources/api/runs/${runId}/artifact`, '_blank');
   };
 
   if (loading) {
@@ -157,7 +157,7 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
                   </td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }} title={emailStatus.tooltip}>
                     <span className={emailStatus.class}>{emailStatus.text}</span>
-                    {!run.email_sent && run.status === 'completed' && run.artifact_path && (
+                    {!run.email_sent && run.status === 'completed' && (
                       <span style={{ marginLeft: '4px', fontSize: '0.9em', opacity: 0.8 }}>
                         (download available)
                       </span>
@@ -168,7 +168,7 @@ export const RunHistoryPage: React.FC<RunHistoryPageProps> = ({ onNavigate, sche
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{size}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{run.error_text || '-'}</td>
                   <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>
-                    {run.status === 'completed' && run.artifact_path ? (
+                    {run.status === 'completed' ? (
                       // @ts-ignore
                       <Button
                         size="sm"
