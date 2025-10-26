@@ -37,6 +37,14 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
+      - name: Update plugin version
+        run: |
+          # Update version in plugin.json
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.version.outputs.version }}"/' src/plugin.json
+          # Update version in package.json
+          sed -i 's/"version": "[^"]*"/"version": "${{ steps.version.outputs.version }}"/' package.json
+          echo "Updated plugin version to ${{ steps.version.outputs.version }}"
+
       - name: Build frontend
         run: npm run build
 
