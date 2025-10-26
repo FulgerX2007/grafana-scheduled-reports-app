@@ -84,9 +84,14 @@ jobs:
           # Create platform-specific package directory with plugin ID as folder name
           mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
-          # Copy only the files we need (excluding platform-specific binaries)
+          # Copy built artifacts (excluding platform-specific binaries)
           rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
           rsync -av dist/gpx_reporting_linux_amd64 ci/packages/fulgerx2007-scheduled-reports-app/gpx_reporting_linux_amd64
+
+          # Copy Go source files and manifest (required by Grafana validator)
+          rsync -av --include='*.go' --include='*/' --exclude='*' pkg/ ci/packages/fulgerx2007-scheduled-reports-app/pkg/
+          rsync -av --include='*.go' --include='*/' --exclude='*' cmd/ ci/packages/fulgerx2007-scheduled-reports-app/cmd/
+          cp go.mod go.sum ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Verify package contents
           echo "=== Package contents ==="
@@ -109,8 +114,13 @@ jobs:
           # Create platform-specific package directory with plugin ID as folder name
           mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
-          # Copy only the files we need (excluding platform-specific binaries)
+          # Copy built artifacts (excluding platform-specific binaries)
           rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
+
+          # Copy Go source files and manifest (required by Grafana validator)
+          rsync -av --include='*.go' --include='*/' --exclude='*' pkg/ ci/packages/fulgerx2007-scheduled-reports-app/pkg/
+          rsync -av --include='*.go' --include='*/' --exclude='*' cmd/ ci/packages/fulgerx2007-scheduled-reports-app/cmd/
+          cp go.mod go.sum ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
@@ -130,8 +140,13 @@ jobs:
           # Create platform-specific package directory with plugin ID as folder name
           mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
-          # Copy only the files we need (excluding platform-specific binaries)
+          # Copy built artifacts (excluding platform-specific binaries)
           rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
+
+          # Copy Go source files and manifest (required by Grafana validator)
+          rsync -av --include='*.go' --include='*/' --exclude='*' pkg/ ci/packages/fulgerx2007-scheduled-reports-app/pkg/
+          rsync -av --include='*.go' --include='*/' --exclude='*' cmd/ ci/packages/fulgerx2007-scheduled-reports-app/cmd/
+          cp go.mod go.sum ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
@@ -151,8 +166,13 @@ jobs:
           # Create platform-specific package directory with plugin ID as folder name
           mkdir -p ci/packages/fulgerx2007-scheduled-reports-app
 
-          # Copy only the files we need (excluding platform-specific binaries)
+          # Copy built artifacts (excluding platform-specific binaries)
           rsync -av --exclude='gpx_reporting_*' dist/ ci/packages/fulgerx2007-scheduled-reports-app/
+
+          # Copy Go source files and manifest (required by Grafana validator)
+          rsync -av --include='*.go' --include='*/' --exclude='*' pkg/ ci/packages/fulgerx2007-scheduled-reports-app/pkg/
+          rsync -av --include='*.go' --include='*/' --exclude='*' cmd/ ci/packages/fulgerx2007-scheduled-reports-app/cmd/
+          cp go.mod go.sum ci/packages/fulgerx2007-scheduled-reports-app/
 
           # Create archive
           cd ci/packages
