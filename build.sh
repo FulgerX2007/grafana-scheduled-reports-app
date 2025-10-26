@@ -173,6 +173,15 @@ cp src/plugin.json dist/
 cp README.md dist/ 2>/dev/null || true
 cp check-chrome-deps.sh dist/ 2>/dev/null || true
 
+# Copy Go manifest files and source files (required by Grafana catalog validator)
+cp go.mod dist/
+cp go.sum dist/
+
+# Copy Go source files using rsync (preserves directory structure)
+echo "  Copying Go source files..."
+rsync -av --include='*.go' --include='*/' --exclude='*' pkg/ dist/pkg/ 2>/dev/null || true
+rsync -av --include='*.go' --include='*/' --exclude='*' cmd/ dist/cmd/ 2>/dev/null || true
+
 # Copy Chrome binary if it exists
 if [ -d "chrome-linux64" ]; then
     echo "  Including Chrome binary from chrome-linux64/"
