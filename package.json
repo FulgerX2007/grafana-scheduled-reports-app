@@ -1,6 +1,6 @@
 {
   "name": "scheduled-reports-app",
-  "version": "1.0.0",
+  "version": "0.0.10",
   "description": "Grafana app plugin for scheduled dashboard reporting",
   "scripts": {
     "dev": "webpack --mode development --watch",

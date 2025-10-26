@@ -10,7 +10,7 @@
       "url": "https://github.com/FulgerX2007/"
     },
     "keywords": ["reporting", "pdf", "email", "scheduler", "chromium", "automation", "dashboard", "export"],
-    "version": "1.0.0",
+    "version": "0.0.10",
     "updated": "2025-10-24",
     "logos": {
       "small": "img/logo.png",
