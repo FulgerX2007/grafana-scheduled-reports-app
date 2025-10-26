@@ -16,6 +16,7 @@
       "small": "img/logo.png",
       "large": "img/logo.png"
     },
+    "state": "beta",
     "screenshots": [
       {
         "name": "Schedules List",
