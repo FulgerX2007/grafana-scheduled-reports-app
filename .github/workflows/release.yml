@@ -184,7 +184,14 @@ jobs:
 
       - name: Generate checksums
         run: |
-          md5sum scheduled-reports-app-*.zip > checksums.txt
+          # Generate individual SHA1 checksum files for each archive (required by Grafana catalog)
+          for file in scheduled-reports-app-*.zip; do
+            sha1sum "$file" | awk '{print $1}' > "${file}.sha1"
+            echo "Generated ${file}.sha1: $(cat ${file}.sha1)"
+          done
+
+          # Also generate combined checksums file for reference
+          sha1sum scheduled-reports-app-*.zip > checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -225,9 +232,11 @@ jobs:
             - ✅ Service account authentication (Grafana 11.6+)
 
             ### Checksums
-            See `checksums.txt` for MD5 checksums of all archives.
+            Individual SHA1 checksum files are provided for each archive (e.g., `scheduled-reports-app-{version}.{platform}.zip.sha1`).
+            See `checksums.txt` for a combined list of all checksums.
           files: |
             scheduled-reports-app-*.zip
+            scheduled-reports-app-*.zip.sha1
             checksums.txt
           draft: false
           prerelease: false
