@@ -1,10 +1,28 @@
 services:
-  # Build service to compile the gpx binary for Alpine
+  # Build frontend (React/TypeScript)
+  build-frontend:
+    image: node:22-alpine
+    working_dir: /build
+    volumes:
+      - .:/build
+      - node-modules-cache:/build/node_modules
+    command: >
+      sh -c "
+      echo 'Building frontend...' &&
+      npm install &&
+      npm run build &&
+      echo 'Frontend built successfully'
+      "
+
+  # Build backend (Go)
   build-backend:
     image: golang:1.25-alpine
     working_dir: /build
     volumes:
       - .:/build
+      - go-modules-cache:/go/pkg/mod
+    environment:
+      GOMODCACHE: /go/pkg/mod
     command: >
       sh -c "
       echo 'Building backend binary for Alpine...' &&
@@ -13,11 +31,12 @@ services:
       chmod +x dist/gpx_reporting_linux_amd64 &&
       echo 'Backend binary built successfully'
       "
-    
 
   grafana:
     image: grafana/grafana:12.2.0
     depends_on:
+      build-frontend:
+        condition: service_completed_successfully
       build-backend:
         condition: service_completed_successfully
     ports:
@@ -55,3 +74,5 @@ services:
 
 volumes:
   grafana-storage:
+  node-modules-cache:
+  go-modules-cache:
